@@ -5,26 +5,43 @@ interface CrosswordCellProps {
   number?: number;
   isActive?: boolean;
   isBlocked?: boolean;
+  isCorrect?: boolean;
+  isIncorrect?: boolean;
   onClick?: (event: React.MouseEvent) => void;
   onKeyDown?: (event: React.KeyboardEvent) => void;
+  width?: number;
+  height?: number;
 }
 
 const CellContainer = styled(Box, {
   shouldForwardProp: (prop) => 
-    prop !== 'isActive' && prop !== 'isBlocked'
+    prop !== 'isActive' && 
+    prop !== 'isBlocked' && 
+    prop !== 'isCorrect' && 
+    prop !== 'isIncorrect' &&
+    prop !== 'width' &&
+    prop !== 'height',
 })<{
   isActive?: boolean;
   isBlocked?: boolean;
-}>(({ theme, isActive, isBlocked }) => ({
+  isIncorrect?: boolean;
+  isCorrect?: boolean;
+  width?: number;
+  height?: number;
+}>(({ theme, isActive, isBlocked, isCorrect, isIncorrect, width=40, height=40 }) => ({
   position: 'relative',
-  width: 40,
-  height: 40,
+  width: `${width}px`,
+  height: `${height}px`,
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  border: isActive
-    ? `1px solid ${theme.palette.primary.main}`
-    : `1px solid ${theme.palette.divider}`,
+  border: isCorrect
+    ? `2px solid ${theme.palette.success.main}`
+    : isIncorrect
+      ? `2px solid ${theme.palette.error.main}`
+      : isActive
+        ? `1px solid ${theme.palette.primary.main}`
+        : `1px solid ${theme.palette.divider}`,
   backgroundColor: isBlocked 
     ? theme.palette.grey[900]
     : theme.palette.background.paper,
@@ -55,13 +72,21 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
   number,
   isActive = false,
   isBlocked = false,
+  isCorrect = false,
+  isIncorrect = false,
   onClick,
   onKeyDown,
+  width=40,
+  height=40,
 }) => {
   return (
     <CellContainer
       isActive={isActive}
       isBlocked={isBlocked}
+      isCorrect={isCorrect}
+      isIncorrect={isIncorrect}
+      width={width}
+      height={height}
       onClick={isBlocked ? undefined : onClick}
       onKeyDown={isBlocked ? undefined : onKeyDown}
       tabIndex={isBlocked ? -1 : 0}

@@ -133,7 +133,7 @@ export function useCrossword(): UseCrosswordReturn {
                         newGrid[cellRow][cellCol].wordId?.push(wordId);
                         newGrid[cellRow][cellCol] = {
                             ...newGrid[cellRow][cellCol],
-                            value: answer[i], 
+                            value: '', 
                             isBlocked: false,
                             number: i === 0 ? position : newGrid[cellRow][cellCol].number
                         };
@@ -153,7 +153,7 @@ export function useCrossword(): UseCrosswordReturn {
                         newGrid[cellRow][cellCol].wordId?.push(wordId);
                         newGrid[cellRow][cellCol] = {
                             ...newGrid[cellRow][cellCol],
-                            value: answer[i], 
+                            value: '', 
                             isBlocked: false,
                             number: i === 0 ? position : newGrid[cellRow][cellCol].number
                         };

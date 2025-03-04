@@ -164,6 +164,34 @@ export function useCrossword(): UseCrosswordReturn {
         setGrid(newGrid);
     }, [createEmptyGrid, width, height]);
 
+    const handleCellClick = (row: number, col: number) => {
+        if (grid[row][col].isBlocked) return;
+    
+        if (activeCell?.row === row && activeCell?.col === col) {
+            setActiveDirection(prev => prev === 'across' ? 'down' : 'across');
+        } else {
+            setActiveCell({ row, col });
+        }
+
+        const cellNumber = grid[row][col].number;
+        if (cellNumber) {
+            const acrossClue = testData.find(c => 
+              c.orientation === 'across' && c.startx - 1 === col && c.starty - 1 === row);
+            const downClue = testData.find(c => 
+              c.orientation === 'down' && c.startx - 1 === col && c.starty - 1 === row);
+            
+            if (acrossClue && activeDirection === 'across') {
+              setActiveClue({ type: 'across', number: acrossClue.position });
+            } else if (downClue && activeDirection === 'down') {
+              setActiveClue({ type: 'down', number: downClue.position });
+            } else if (acrossClue) {
+              setActiveClue({ type: 'across', number: acrossClue.position });
+            } else if (downClue) {
+              setActiveClue({ type: 'down', number: downClue.position });
+            }
+        }
+    };
+
     const handleClueClick = useCallback((type: 'across' | 'down', number: number) => {
         setActiveClue({ type, number });
         

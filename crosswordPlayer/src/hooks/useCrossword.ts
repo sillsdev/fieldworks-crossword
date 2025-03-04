@@ -166,7 +166,7 @@ export function useCrossword(): UseCrosswordReturn {
         setGrid(newGrid);
     }, [createEmptyGrid, width, height]);
 
-    const handleCellClick = useCallback((row: number, col: number) => {
+    const handleCellClick = (row: number, col: number) => {
         if (grid[row][col].isBlocked) return;
     
         if (activeCell?.row === row && activeCell?.col === col) {
@@ -192,7 +192,7 @@ export function useCrossword(): UseCrosswordReturn {
               setActiveClue({ type: 'down', number: downClue.position });
             }
         }
-    }, [grid, activeDirection]);
+    };
 
     const handleClueClick = useCallback((type: 'across' | 'down', number: number) => {
         setActiveClue({ type, number });

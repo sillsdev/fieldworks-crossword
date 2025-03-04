@@ -1,9 +1,10 @@
 import { Container, Box, Typography, Button } from '@mui/material';
 import CrosswordBoard from './components/Crossword/CrosswordBoard';
+import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
 
 function App() {
-  const { onCheckClick } = useCrossword();
+  const { onCheckClick, handleClueClick, activeClue } = useCrossword();
   return (
     <Container 
       sx={{ 
@@ -58,6 +59,10 @@ function App() {
           </Button>
         </Box>
       </Box>
+      { <CrosswordClues 
+          onClueClick={handleClueClick}
+          activeClue={activeClue}
+      /> }
     </Container>
   )
 }

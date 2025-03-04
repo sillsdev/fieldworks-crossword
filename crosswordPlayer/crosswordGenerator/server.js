@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 app.use(express.json());
+const { generateLayout } = require('./layout-generator.js');
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("Server Listening on PORT:", PORT);
@@ -26,16 +27,19 @@ app.get("/fetch-words", async (req, res) => {
     
     try {
         const apiResponse = await axios.get(apiUrl);
-        // console.log('Data from API:', apiResponse.data);
+        // filter words
         const filteredData = apiResponse.data.filter(entry => {
             let word = entry.citationForm.seh || entry.lexemeForm.seh;
             return validateWord(word);
         });
         let my10Words = chooseRandomWords(filteredData, 10);
-        my10Words.forEach(entry => {
-            // print {word - definition}
-            console.log((entry.citationForm.seh || entry.lexemeForm.seh) + " - " + (entry.senses[0].definition.en || entry.senses[0].gloss.en));
-        });
+        // make chosen words into an object
+        const input = my10Words.map(entry => ({
+            clue: (entry.senses[0].definition.en || entry.senses[0].gloss.en),
+            answer: (entry.citationForm.seh || entry.lexemeForm.seh)
+        }));
+        var layout = generateLayout(input);
+        console.log("Printing layout", layout);
     } catch (error) {
         console.error("Error fetching data:", error.message);
     }

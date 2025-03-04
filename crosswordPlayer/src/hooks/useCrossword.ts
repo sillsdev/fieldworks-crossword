@@ -1,4 +1,5 @@
-import { useState, KeyboardEvent, useCallback } from 'react';
+import { useState, KeyboardEvent, useCallback, useEffect } from 'react';
+import testData from '../test.json';
 
 export interface CellData {
     value: string;
@@ -6,6 +7,7 @@ export interface CellData {
     isBlocked: boolean;
     isRevealed?: boolean;
     isInput?: boolean;
+    wordId?: string[];
 }
 
 export interface ActiveCellPosition {
@@ -28,15 +30,35 @@ export interface Word {
     answer: string;
     clue: string;
     position: number;
-    orientaion: Direction;
+    orientation: Direction;
     startRow: number;
     startCol: number;
     cells: { row: number, col: number}[];
 }
 
 export function useCrossword(): UseCrosswordReturn {
-    const width = 15;
-    const height = 15;
+    const calcDimensions = () => {
+        let maxX = 0;
+        let maxY = 0;
+
+        testData.forEach(clue => {
+            const answerLength = clue.answer.length;
+      
+            if (clue.orientation === 'across') {
+              const endX = clue.startx + answerLength - 1;
+              maxX = Math.max(maxX, endX);
+              maxY = Math.max(maxY, clue.starty);
+            } else {
+              const endY = clue.starty + answerLength - 1;
+              maxX = Math.max(maxX, clue.startx);
+              maxY = Math.max(maxY, endY);
+            }
+          });
+
+        return { width: maxX, height: maxY };
+    };
+
+    const { width, height } = calcDimensions();
 
     const createEmptyGrid = useCallback((): CellData[][] => {
         const emptyGrid: CellData[][] = [];
@@ -53,11 +75,80 @@ export function useCrossword(): UseCrosswordReturn {
     const [grid, setGrid] = useState<CellData[][]>(createEmptyGrid());
     const [activeCell, setActiveCell] = useState<ActiveCellPosition | null>(null);
     const [activeDirection, setActiveDirection] = useState<Direction>('across');
-    // const [answerKey, setAnswerKey] = useState<Map<string, string>>(new Map());
-    // const [words, setWords] = useState<Word[]>([]);
-    // const [activeWordId, setActiveWordId] = useState<string | null>(null);
+    const [words, setWords] = useState<Word[]>([]);
+    const [activeWordId, setActiveWordId] = useState<string | null>(null);
     
-    const words: Word[] = [];
+    useEffect(() => {
+        const newGrid = createEmptyGrid();
+        const wordsList: Word[] = [];
+
+        testData.forEach(wordData => {
+            const { answer, startx, starty, position, orientation, clue } = wordData;
+
+            const x = startx - 1;
+            const y = starty - 1;
+            const wordId = `${orientation} - ${position}`;
+
+            const word: Word = {
+                id: wordId,
+                answer: answer.toUpperCase(),
+                clue, 
+                position,
+                orientation: orientation as Direction,
+                startRow: y,
+                startCol: x,
+                cells: []
+            };
+
+            for (let i = 0; i < answer.length; i++) {
+                if (orientation === 'across') {
+                    if (x + i < width && y < height) {
+                        const cellRow = y;
+                        const cellCol = x + i;
+                        
+                        // Add this cell to word's cells
+                        word.cells.push({ row: cellRow, col: cellCol });
+                        
+                        // Update the grid cell
+                        if (!newGrid[cellRow][cellCol].wordId) {
+                            newGrid[cellRow][cellCol].wordId = [];
+                        }
+                        newGrid[cellRow][cellCol].wordId?.push(wordId);
+                        newGrid[cellRow][cellCol] = {
+                            ...newGrid[cellRow][cellCol],
+                            value: '', 
+                            isBlocked: false,
+                            number: i === 0 ? position : newGrid[cellRow][cellCol].number
+                        };
+                    }
+                } else { // down
+                    if (x < width && y + i < height) {
+                        const cellRow = y + i;
+                        const cellCol = x;
+                        
+                        // Add this cell to word's cells
+                        word.cells.push({ row: cellRow, col: cellCol });
+                        
+                        // Update the grid cell
+                        if (!newGrid[cellRow][cellCol].wordId) {
+                            newGrid[cellRow][cellCol].wordId = [];
+                        }
+                        newGrid[cellRow][cellCol].wordId?.push(wordId);
+                        newGrid[cellRow][cellCol] = {
+                            ...newGrid[cellRow][cellCol],
+                            value: '', 
+                            isBlocked: false,
+                            number: i === 0 ? position : newGrid[cellRow][cellCol].number
+                        };
+                    }
+                }
+            }
+            wordsList.push(word);
+        })
+        setWords(wordsList);
+        console.log(wordsList);
+        setGrid(newGrid);
+    }, [createEmptyGrid, width, height]);
 
     const handleCellClick = (rowIndex: number, colIndex: number) => {
         if (grid[rowIndex][colIndex].isBlocked) return;
@@ -137,7 +228,7 @@ export function useCrossword(): UseCrosswordReturn {
         grid,
         handleCellClick,
         handleKeyDown,
-        isActiveCell,
+        isActiveCell, 
         words
     };
 };

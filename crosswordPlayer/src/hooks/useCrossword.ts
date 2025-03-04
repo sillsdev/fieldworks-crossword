@@ -5,8 +5,8 @@ export interface CellData {
     value: string;
     number?: number;
     isBlocked: boolean;
-    isRevealed?: boolean;
-    isInput?: boolean;
+    isCorrect?: boolean;
+    isIncorrect?: boolean;
     wordId?: string[];
 }
 
@@ -23,6 +23,7 @@ interface UseCrosswordReturn {
     handleKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
     isActiveCell: (rowIndex: number, colIndex: number) => boolean;
     words: Word[];
+    onCheckClick: () => void;
 }
 
 export interface Word {
@@ -116,7 +117,7 @@ export function useCrossword(): UseCrosswordReturn {
                         newGrid[cellRow][cellCol].wordId?.push(wordId);
                         newGrid[cellRow][cellCol] = {
                             ...newGrid[cellRow][cellCol],
-                            value: '', 
+                            value: answer[i], 
                             isBlocked: false,
                             number: i === 0 ? position : newGrid[cellRow][cellCol].number
                         };
@@ -136,7 +137,7 @@ export function useCrossword(): UseCrosswordReturn {
                         newGrid[cellRow][cellCol].wordId?.push(wordId);
                         newGrid[cellRow][cellCol] = {
                             ...newGrid[cellRow][cellCol],
-                            value: '', 
+                            value: answer[i], 
                             isBlocked: false,
                             number: i === 0 ? position : newGrid[cellRow][cellCol].number
                         };
@@ -146,7 +147,6 @@ export function useCrossword(): UseCrosswordReturn {
             wordsList.push(word);
         })
         setWords(wordsList);
-        console.log(wordsList);
         setGrid(newGrid);
     }, [createEmptyGrid, width, height]);
 
@@ -158,6 +158,66 @@ export function useCrossword(): UseCrosswordReturn {
         } else {
             setActiveCell({ row: rowIndex, col: colIndex });
         }
+    };
+
+    const onCheckClick = () => {
+        const results = handleCheckClick();
+        alert(`Results: ${results.correct} correct, ${results.incorrect} incorrect, ${results.incomplete} incomplete out of ${results.total} total words`);
+    };
+
+    const handleCheckClick = () => {
+        const newGrid = [...grid];
+        const result = {
+            correct: 0,
+            incorrect: 0,
+            incomplete: 0,
+            total: words.length
+        };
+
+        words.forEach(word => {
+            let userWord = '';
+            let isComplete = true;
+
+            word.cells.forEach(({ row, col }) => {
+                if (row < grid.length && col < grid[0].length) {
+                    const cellVal = grid[row][col].value;
+                    if (!cellVal) {
+                        isComplete = false;
+                    }
+                    userWord += cellVal;
+                }
+            });
+
+            if (isComplete) {
+                const isCorrect = userWord.toUpperCase() === word.answer.toUpperCase();
+                if (isCorrect) {
+                    result.correct++;
+
+                    word.cells.forEach(({ row, col }) => {
+                        newGrid[row][col] = {
+                            ...newGrid[row][col],
+                            isCorrect: true,
+                            isIncorrect: false
+                        };
+                    });
+                } else {
+                    result.incorrect++;
+
+                    word.cells.forEach(({ row, col }) => {
+                        newGrid[row][col] = {
+                            ...newGrid[row][col],
+                            isCorrect: false,
+                            isIncorrect: true
+                        };
+                    });
+                }
+            } else {
+                result.incomplete++;
+            }
+        });
+
+        setGrid(newGrid);
+        return result;
     };
 
     // Will need to work on the moving later 
@@ -229,6 +289,7 @@ export function useCrossword(): UseCrosswordReturn {
         handleCellClick,
         handleKeyDown,
         isActiveCell, 
-        words
+        words,
+        onCheckClick
     };
 };

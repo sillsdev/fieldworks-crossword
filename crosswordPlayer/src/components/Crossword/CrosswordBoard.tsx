@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
+import CrosswordClues from './CrosswordClues';
 import { useCrossword } from '../../hooks/useCrossword';
 
 const CrosswordBoard = () => {
@@ -8,6 +9,8 @@ const CrosswordBoard = () => {
         handleCellClick,
         handleKeyDown,
         isActiveCell,
+        handleClueClick,
+        activeClue
     } = useCrossword();
 
     if (!grid || grid.length === 0) {
@@ -52,6 +55,11 @@ const CrosswordBoard = () => {
                     </Box>
                 ))}
             </Box>
+            
+            { <CrosswordClues 
+                onClueClick={handleClueClick}
+                activeClue={activeClue}
+            /> }
         </Box>
     );
 };

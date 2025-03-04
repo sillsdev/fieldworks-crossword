@@ -7,23 +7,45 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("Server Listening on PORT:", PORT);
 });
-app.get("/fetch-data", async (req, res) => {
+app.get("/fetch-languages", async (req, res) => {
     console.log("Fetching data from external API...");
     const apiUrl = 'http://localhost:49279/api/localProjects';
     
     try {
         const apiResponse = await axios.get(apiUrl);
-        // Print the data from the API
-        console.log(apiResponse.data[0].apiEndpoint);
-        console.log('Data from API:', apiResponse.data);
+        const languages = await Promise.all(apiResponse.data.map(async (element) => {
+            if (element.fwdata === true) {
+                // get language code for each fwdata project
+                const language = await fetchLanguage(element.name);
+                const languageData = {
+                    languageCode: language,
+                    projectName: element.name
+                }
+                return languageData;
+            }
+            return null;
+        }));
     } catch (error) {
-        console.error("Error fetching data:", error.message);
+        console.error("Error fetching languages:", error.message);
     }
 });
 
-app.get("/fetch-words", async (req, res) => {
+// fetch language code for each project
+async function fetchLanguage(projectName) {
+    const languageUrl = `http://localhost:49279/api/mini-lcm/FwData/${projectName}/writingSystems`;
+    
+    try {
+        const languageResponse = await axios.get(languageUrl);
+        return languageResponse.data.vernacular[0].name;
+    } catch (error) {
+        console.error("Error fetching language data:", error.message);
+    }
+}
+
+app.get("/generate-crossword", async (req, res) => {
     console.log("Fetching words...");
-    const apiUrl = 'http://localhost:49279/api/mini-lcm/FwData/sena-3/entries?count=-1';
+    const { projectName } = req.query;
+    const apiUrl = `http://localhost:49279/api/mini-lcm/FwData/${projectName}/entries?count=-1`;
     
     try {
         const apiResponse = await axios.get(apiUrl);

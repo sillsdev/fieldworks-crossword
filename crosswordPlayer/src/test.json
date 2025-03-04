@@ -1,98 +1,18 @@
 [
     {
-      "clue": "A structure that provides shade from the sun",
-      "answer": "umbrella",
-      "startx": 4,
+      "clue": "Opposite of cold",
+      "answer": "hot",
+      "startx": 1,
       "starty": 1,
       "position": 1,
-      "orientation": "down"
+      "orientation": "across"
     },
     {
-      "clue": "An informal term for a university",
-      "answer": "college",
+      "clue": "Place to sleep",
+      "answer": "bed",
       "startx": 1,
-      "starty": 4,
+      "starty": 1,
       "position": 2,
-      "orientation": "across"
-    },
-    {
-      "clue": "A device used for calculating",
-      "answer": "calculator",
-      "startx": 3,
-      "starty": 6,
-      "position": 3,
-      "orientation": "across"
-    },
-    {
-      "clue": "A musical instrument with strings",
-      "answer": "guitar",
-      "startx": 8,
-      "starty": 2,
-      "position": 4,
-      "orientation": "down"
-    },
-    {
-      "clue": "A bitter dark brown powder used to make a drink",
-      "answer": "coffee",
-      "startx": 1,
-      "starty": 8,
-      "position": 5,
-      "orientation": "across"
-    },
-    {
-      "clue": "The planet we live on",
-      "answer": "earth",
-      "startx": 10,
-      "starty": 5,
-      "position": 6,
-      "orientation": "across"
-    },
-    {
-      "clue": "The closest star to Earth",
-      "answer": "sun",
-      "startx": 6,
-      "starty": 3,
-      "position": 7,
-      "orientation": "down"
-    },
-    {
-      "clue": "A small sweet fruit",
-      "answer": "berry",
-      "startx": 5,
-      "starty": 9,
-      "position": 8,
-      "orientation": "across"
-    },
-    {
-      "clue": "A sailing vessel",
-      "answer": "boat",
-      "startx": 12,
-      "starty": 3,
-      "position": 9,
-      "orientation": "down"
-    },
-    {
-      "clue": "An electronic device for communication",
-      "answer": "phone",
-      "startx": 7,
-      "starty": 10,
-      "position": 10,
-      "orientation": "across"
-    },
-    {
-      "clue": "A four-legged pet that barks",
-      "answer": "dog",
-      "startx": 3,
-      "starty": 2,
-      "position": 11,
-      "orientation": "across"
-    },
-    {
-      "clue": "A place to buy things",
-      "answer": "store",
-      "startx": 10,
-      "starty": 8,
-      "position": 12,
       "orientation": "down"
     }
   ]

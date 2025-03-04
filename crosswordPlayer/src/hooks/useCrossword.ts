@@ -189,7 +189,7 @@ export function useCrossword(): UseCrosswordReturn {
             });
 
             if (isComplete) {
-                const isCorrect = userWord.toUpperCase() === word.answer.toUpperCase();
+                const isCorrect = userWord.toUpperCase() === word.answer;
                 if (isCorrect) {
                     result.correct++;
 
@@ -202,7 +202,7 @@ export function useCrossword(): UseCrosswordReturn {
                     });
                 } else {
                     result.incorrect++;
-
+                    
                     word.cells.forEach(({ row, col }) => {
                         newGrid[row][col] = {
                             ...newGrid[row][col],

@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
-//import CrosswordClues from './CrosswordClues';
 import { useCrossword } from '../../hooks/useCrossword';
 
 const CrosswordBoard = () => {
@@ -11,24 +10,34 @@ const CrosswordBoard = () => {
         isActiveCell,
     } = useCrossword();
 
-    if (!grid || grid.length == 0) {
+    if (!grid || grid.length === 0) {
         return <Box>Loading crossword...</Box>
     }
 
     return (
         <Box sx={{
+            width: '100%',
             display: 'flex',
-            alignItems: 'flex-start',
-            gap: '20px',
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'auto', 
         }}>
             <Box sx={(theme) => ({
-                display: 'inline-block',
+                display: 'flex',
+                flexDirection: 'column',
                 border: `2px solid ${theme.palette.grey[900]}`,
+                width: '100%',
+                maxWidth: '500px',
+                margin: 'auto',
             })}>
                 {grid.map((row, rowIndex) => (
-                    <Box key={rowIndex} sx={{
-                        display: 'flex',
-                    }}>
+                    <Box 
+                        key={rowIndex} 
+                        sx={{
+                            display: 'flex',
+                            width: '100%',
+                        }}
+                    >
                         {row.map((cell, colIndex) => (
                             <CrosswordCell 
                                 key={`cell-${rowIndex}-${colIndex}`}
@@ -37,17 +46,12 @@ const CrosswordBoard = () => {
                                 isActive={isActiveCell(rowIndex, colIndex)}
                                 isBlocked={cell.isBlocked}
                                 onClick={() => handleCellClick(rowIndex, colIndex)}
-                                onKeyDown={(event) => handleKeyDown(event as React.KeyboardEvent<HTMLDivElement>)}
+                                onKeyDown={(event) => handleKeyDown(event)}
                             />
                         ))}
                     </Box>
                 ))}
             </Box>
-            
-            {/* <CrosswordClues 
-                //onClueClick={handleClueClick}
-                //activeClue={activeClue}
-            /> */}
         </Box>
     );
 };

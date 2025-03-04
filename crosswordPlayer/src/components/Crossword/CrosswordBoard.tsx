@@ -1,16 +1,13 @@
 import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
 import { useCrossword } from '../../hooks/useCrossword';
-import useInput from '../../hooks/useInput';
 
 const CrosswordBoard = () => {
     const { 
         grid,
-        handleCellClick,
         isActiveCell,
+        handleClick
     } = useCrossword();
-
-    const { grid, selectedCell, handleClick } = useInput(crosswordGrid.map(row => row.map(cell => cell.value)));
 
     if (!grid || grid.length === 0) {
         return <Box>Loading crossword...</Box>
@@ -43,10 +40,10 @@ const CrosswordBoard = () => {
                         {row.map((cell, colIndex) => (
                             <CrosswordCell 
                                 key={`cell-${rowIndex}-${colIndex}`}
-                                value={cell}
-                                number={crosswordGrid[rowIndex][colIndex].number}
+                                value={cell.value}
+                                number={cell.number}
                                 isActive={isActiveCell(rowIndex, colIndex)}
-                                isBlocked={crosswordGrid[rowIndex][colIndex].isBlocked}
+                                isBlocked={cell.isBlocked}
                                 onClick={() => handleClick(rowIndex, colIndex)}
                             />
                         ))}

@@ -6,7 +6,6 @@ interface CrosswordCellProps {
   isActive?: boolean;
   isBlocked?: boolean;
   onClick?: (event: React.MouseEvent) => void;
-  onKeyDown?: (event: React.KeyboardEvent) => void;
 }
 
 const CellContainer = styled(Box, {
@@ -56,14 +55,12 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
   isActive = false,
   isBlocked = false,
   onClick,
-  onKeyDown,
 }) => {
   return (
     <CellContainer
       isActive={isActive}
       isBlocked={isBlocked}
       onClick={isBlocked ? undefined : onClick}
-      onKeyDown={isBlocked ? undefined : onKeyDown}
       tabIndex={isBlocked ? -1 : 0}
       aria-label={`${number ? `Cell ${number}, ` : ''}${value ? `Letter ${value}` : 'Empty cell'}`}
     >

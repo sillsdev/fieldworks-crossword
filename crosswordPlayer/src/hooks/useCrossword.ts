@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import testData from '../test.json';
 
 export interface CellData {
@@ -19,8 +19,6 @@ export type Direction = 'across' | 'down';
 
 interface UseCrosswordReturn {
     grid: CellData[][];
-    handleCellClick: (rowIndex: number, colIndex: number) => void;
-    handleKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
     isActiveCell: (rowIndex: number, colIndex: number) => boolean;
     words: Word[];
     onCheckClick: () => void;
@@ -166,34 +164,6 @@ export function useCrossword(): UseCrosswordReturn {
         setGrid(newGrid);
     }, [createEmptyGrid, width, height]);
 
-    const handleCellClick = useCallback((row: number, col: number) => {
-        if (grid[row][col].isBlocked) return;
-    
-        if (activeCell?.row === row && activeCell?.col === col) {
-            setActiveDirection(prev => prev === 'across' ? 'down' : 'across');
-        } else {
-            setActiveCell({ row, col });
-        }
-
-        const cellNumber = grid[row][col].number;
-        if (cellNumber) {
-            const acrossClue = testData.find(c => 
-              c.orientation === 'across' && c.startx - 1 === col && c.starty - 1 === row);
-            const downClue = testData.find(c => 
-              c.orientation === 'down' && c.startx - 1 === col && c.starty - 1 === row);
-            
-            if (acrossClue && activeDirection === 'across') {
-              setActiveClue({ type: 'across', number: acrossClue.position });
-            } else if (downClue && activeDirection === 'down') {
-              setActiveClue({ type: 'down', number: downClue.position });
-            } else if (acrossClue) {
-              setActiveClue({ type: 'across', number: acrossClue.position });
-            } else if (downClue) {
-              setActiveClue({ type: 'down', number: downClue.position });
-            }
-        }
-    }, [grid, activeDirection]);
-
     const handleClueClick = useCallback((type: 'across' | 'down', number: number) => {
         setActiveClue({ type, number });
         
@@ -267,62 +237,6 @@ export function useCrossword(): UseCrosswordReturn {
         return result;
     };
 
-    // Will need to work on the moving later 
-    const moveToNextCell = () => {
-        if (!activeCell) return;
-        
-        const { row, col } = activeCell;
-        if (activeDirection === 'across') {
-          // Move right
-          if (col < grid[0].length - 1) {
-            const nextCol = col + 1;
-            if (!grid[row][nextCol].isBlocked) {
-              setActiveCell({ row, col: nextCol });
-            }
-          }
-        } else {
-          // Move down
-          if (row < grid.length - 1) {
-            const nextRow = row + 1;
-            if (!grid[nextRow][col].isBlocked) {
-              setActiveCell({ row: nextRow, col });
-            }
-          }
-        }
-    };
-
-    const moveToPrevCell = () => {
-        if (!activeCell) return;
-        
-        const { row, col } = activeCell;
-        if (activeDirection === 'across') {
-          // Move left
-          if (col > 0) {
-            const prevCol = col - 1;
-            if (!grid[row][prevCol].isBlocked) {
-              setActiveCell({ row, col: prevCol });
-            }
-          }
-        } else {
-          // Move up
-          if (row > 0) {
-            const prevRow = row - 1;
-            if (!grid[prevRow][col].isBlocked) {
-              setActiveCell({ row: prevRow, col });
-            }
-          }
-        }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === 'ArrowRight') {
-            console.log("RIGHT");
-            moveToNextCell();
-        } else if (event.key === 'ArrowLeft') {
-            moveToPrevCell();
-        }
-    };
-
     const isActiveCell = (rowIndex: number, colIndex: number): boolean => {
         if (!activeCell) return false;
         if (activeCell.col === colIndex && activeCell.row === rowIndex) {
@@ -333,8 +247,6 @@ export function useCrossword(): UseCrosswordReturn {
 
     return {
         grid,
-        handleCellClick,
-        handleKeyDown,
         isActiveCell, 
         words,
         onCheckClick,

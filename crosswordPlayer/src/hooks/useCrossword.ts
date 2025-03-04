@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent, useCallback, useEffect } from 'react';
+import { useState, KeyboardEvent, useCallback, useEffect, useMemo } from 'react';
 import testData from '../test.json';
 
 export interface CellData {
@@ -24,6 +24,8 @@ interface UseCrosswordReturn {
     isActiveCell: (rowIndex: number, colIndex: number) => boolean;
     words: Word[];
     onCheckClick: () => void;
+    handleClueClick: (type: 'across' | 'down', number: number) => void;
+    activeClue: { type: 'across' | 'down'; number: number } | null;
 }
 
 export interface Word {
@@ -78,6 +80,20 @@ export function useCrossword(): UseCrosswordReturn {
     const [activeDirection, setActiveDirection] = useState<Direction>('across');
     const [words, setWords] = useState<Word[]>([]);
     const [activeWordId, setActiveWordId] = useState<string | null>(null);
+    const [activeClue, setActiveClue] = useState<{ type: 'across' | 'down'; number: number } | null>(null);
+    
+    const cluePositions = useMemo(() => {
+        const positions: Record<string, { row: number; col: number }> = {};
+        
+        testData.forEach(clue => {
+          const row = clue.starty - 1;
+          const col = clue.startx - 1;
+          
+          positions[`${clue.orientation}-${clue.position}`] = { row, col };
+        });
+        
+        return positions;
+    }, []);
     
     useEffect(() => {
         const newGrid = createEmptyGrid();
@@ -150,15 +166,46 @@ export function useCrossword(): UseCrosswordReturn {
         setGrid(newGrid);
     }, [createEmptyGrid, width, height]);
 
-    const handleCellClick = (rowIndex: number, colIndex: number) => {
-        if (grid[rowIndex][colIndex].isBlocked) return;
+    const handleCellClick = useCallback((row: number, col: number) => {
+        if (grid[row][col].isBlocked) return;
     
-        if (activeCell?.row === rowIndex && activeCell?.col === colIndex) {
+        if (activeCell?.row === row && activeCell?.col === col) {
             setActiveDirection(prev => prev === 'across' ? 'down' : 'across');
         } else {
-            setActiveCell({ row: rowIndex, col: colIndex });
+            setActiveCell({ row, col });
         }
-    };
+
+        const cellNumber = grid[row][col].number;
+        if (cellNumber) {
+            const acrossClue = testData.find(c => 
+              c.orientation === 'across' && c.startx - 1 === col && c.starty - 1 === row);
+            const downClue = testData.find(c => 
+              c.orientation === 'down' && c.startx - 1 === col && c.starty - 1 === row);
+            
+            if (acrossClue && activeDirection === 'across') {
+              setActiveClue({ type: 'across', number: acrossClue.position });
+            } else if (downClue && activeDirection === 'down') {
+              setActiveClue({ type: 'down', number: downClue.position });
+            } else if (acrossClue) {
+              setActiveClue({ type: 'across', number: acrossClue.position });
+            } else if (downClue) {
+              setActiveClue({ type: 'down', number: downClue.position });
+            }
+        }
+    }, [grid, activeDirection]);
+
+    const handleClueClick = useCallback((type: 'across' | 'down', number: number) => {
+        setActiveClue({ type, number });
+        
+        setActiveDirection(type);
+        
+        const key = `${type}-${number}`;
+        const position = cluePositions[key];
+        
+        if (position) {
+          setActiveCell(position);
+        }
+    }, [cluePositions]);
 
     const onCheckClick = () => {
         const results = handleCheckClick();
@@ -290,6 +337,8 @@ export function useCrossword(): UseCrosswordReturn {
         handleKeyDown,
         isActiveCell, 
         words,
-        onCheckClick
+        onCheckClick,
+        handleClueClick,
+        activeClue
     };
 };

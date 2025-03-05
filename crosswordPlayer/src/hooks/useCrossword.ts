@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import testData from '../test.json';
 
 export interface CellData {
@@ -21,7 +21,7 @@ interface UseCrosswordReturn {
     grid: CellData[][];
     isActiveCell: (rowIndex: number, colIndex: number) => boolean;
     words: Word[];
-    onCheckClick: () => void;
+    handleCheckClick: () => { correct: number; incorrect: number; incomplete: number; total: number };
     handleClueClick: (type: 'across' | 'down', number: number) => void;
     activeClue: { type: 'across' | 'down'; number: number } | null;
     handleKeyDown: (event: KeyboardEvent) => void;
@@ -75,11 +75,11 @@ export function useCrossword(): UseCrosswordReturn {
         return emptyGrid;
     }, [height, width]);
 
-    const [grid, setGrid] = useState<CellData[][]>(createEmptyGrid());
+    const [grid, setGrid] = useState<CellData[][]>([]);
+    const gridRef = useRef(grid);
     const [activeCell, setActiveCell] = useState<ActiveCellPosition | null>(null);
     const [activeDirection, setActiveDirection] = useState<Direction>('across');
     const [words, setWords] = useState<Word[]>([]);
-    const [activeWordId, setActiveWordId] = useState<string | null>(null);
     const [activeClue, setActiveClue] = useState<{ type: 'across' | 'down'; number: number } | null>(null);
     
     const cluePositions = useMemo(() => {
@@ -164,35 +164,14 @@ export function useCrossword(): UseCrosswordReturn {
         })
         setWords(wordsList);
         setGrid(newGrid);
-    }, [createEmptyGrid, width, height]);
+        console.log("from useeffect", newGrid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-    const handleCellClick = (row: number, col: number) => {
-        if (grid[row][col].isBlocked) return;
-    
-        if (activeCell?.row === row && activeCell?.col === col) {
-            setActiveDirection(prev => prev === 'across' ? 'down' : 'across');
-        } else {
-            setActiveCell({ row, col });
-        }
-
-        const cellNumber = grid[row][col].number;
-        if (cellNumber) {
-            const acrossClue = testData.find(c => 
-              c.orientation === 'across' && c.startx - 1 === col && c.starty - 1 === row);
-            const downClue = testData.find(c => 
-              c.orientation === 'down' && c.startx - 1 === col && c.starty - 1 === row);
-            
-            if (acrossClue && activeDirection === 'across') {
-              setActiveClue({ type: 'across', number: acrossClue.position });
-            } else if (downClue && activeDirection === 'down') {
-              setActiveClue({ type: 'down', number: downClue.position });
-            } else if (acrossClue) {
-              setActiveClue({ type: 'across', number: acrossClue.position });
-            } else if (downClue) {
-              setActiveClue({ type: 'down', number: downClue.position });
-            }
-        }
-    };
+    useEffect(() => {
+        console.log("second useeffect", grid[0]);
+        gridRef.current = grid;
+    }, [grid]);
 
     const handleClueClick = useCallback((type: 'across' | 'down', number: number) => {
         setActiveClue({ type, number });
@@ -207,12 +186,7 @@ export function useCrossword(): UseCrosswordReturn {
         }
     }, [cluePositions]);
 
-    const onCheckClick = () => {
-        const results = handleCheckClick();
-        alert(`Results: ${results.correct} correct, ${results.incorrect} incorrect, ${results.incomplete} incomplete out of ${results.total} total words`);
-    };
-
-    const handleCheckClick = () => {
+    const handleCheckClick = useCallback(() => {
         const newGrid = [...grid];
         const result = {
             correct: 0,
@@ -262,10 +236,10 @@ export function useCrossword(): UseCrosswordReturn {
                 result.incomplete++;
             }
         });
-
+        console.log("newGrid", newGrid);
         setGrid(newGrid);
         return result;
-    };
+    }, [grid]);
 
     const isActiveCell = (rowIndex: number, colIndex: number): boolean => {
         if (!activeCell) return false;
@@ -286,6 +260,7 @@ export function useCrossword(): UseCrosswordReturn {
             const newGrid = [...grid];
             newGrid[row][col].value = key.toUpperCase();
             setGrid(newGrid);
+            console.log(newGrid);
         } else if (key === 'ArrowUp' && row > 0) {
             setActiveCell({ row: row - 1, col });
         } else if (key === 'ArrowDown' && row < grid.length - 1) {
@@ -306,13 +281,13 @@ export function useCrossword(): UseCrosswordReturn {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [activeCell, grid]);
+    });
 
     return {
         grid,
         isActiveCell, 
         words,
-        onCheckClick,
+        handleCheckClick,
         handleClueClick,
         activeClue,
         handleKeyDown,

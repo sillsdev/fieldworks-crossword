@@ -2,23 +2,34 @@ import { Container, Box, Typography, Button, Grid } from '@mui/material';
 import CrosswordBoard from './components/Crossword/CrosswordBoard';
 import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
+import LanguageSelector from './components/LanguageSelector';
+import { useState } from 'react';
 
 function App() {
+  const [crosswordData, setCrosswordData] = useState<any>(null);
+
   const { 
     handleCheckClick, 
     handleClueClick, 
     activeClue, 
     grid, 
     handleClick, 
-    isActiveCell 
-  } = useCrossword();
+    isActiveCell,
+    formattedClues
+  } = useCrossword(crosswordData);
+
+  const handleCrosswordGenerated = (data: any) => {
+    setCrosswordData(data);
+  };
+
   return (
     <Container 
       sx={{ 
         width: '100vw',
         height: '100vh', 
         display: 'flex', 
-        justifyContent: 'center',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         px: { xs: 2, sm: 4 },
         py: 2,
@@ -26,6 +37,7 @@ function App() {
         boxSizing: 'border-box'
       }}
     >
+      <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
       <Box sx={{ 
         width: '100%',
         maxWidth: 1200,
@@ -72,8 +84,15 @@ function App() {
           </Button>
         </Box>
       </Box>
+      <Box sx={{ width: '100%', maxWidth: 600, mt: 3 }}>
+        <CrosswordClues 
+          clues={formattedClues}
+          onClueClick={handleClueClick}
+          activeClue={activeClue}
+        />
+      </Box>
     </Container>
-  )
+  );
 }
 
 export default App;

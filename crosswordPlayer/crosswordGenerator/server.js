@@ -1,7 +1,16 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
 const app = express();
 app.use(express.json());
+
+app.use(cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
+    credentials: true
+}));
+
 const { generateLayout } = require('./layout-generator.js');
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -25,6 +34,7 @@ app.get("/fetch-languages", async (req, res) => {
             }
             return null;
         }));
+        res.json(languages.filter(lang => lang !== null));
     } catch (error) {
         console.error("Error fetching languages:", error.message);
     }

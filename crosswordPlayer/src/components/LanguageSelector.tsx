@@ -1,19 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import useLanguageGenerator from '../hooks/useLanguageGenerator';
+import { LanguageData, LanguageSelectorProps } from '../types/types';
 
-interface LanguageData {
-    languageCode: {
-        languageName: string;
-        analysisLanguages: string[];
-    };
-    projectName: string;
-    analysisLanguage?: string;
-}
-
-interface LanguageSelectorProps {
-    onCrosswordGenerated: (crosswordData: any) => void;
-}
 
 const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
     const { fetchLanguages, loading, error, generateCrossword } = useLanguageGenerator(); 

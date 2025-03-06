@@ -1,16 +1,12 @@
 import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
-import { useCrossword } from '../../hooks/useCrossword';
 import { useEffect, useState, useRef } from 'react';
 
-const CrosswordBoard = () => {
-    const { 
-        grid,
-        isActiveCell,
-        handleClick
-    } = useCrossword();
+const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
     const [cellSize, setCellSize] = useState(40); 
     const containerRef = useRef<HTMLDivElement>(null);
+    const [showFeedback, setShowFeedback] = useState(false);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     useEffect(() => {
         if (!grid || grid.length === 0 || !containerRef.current) return;
@@ -38,13 +34,33 @@ const CrosswordBoard = () => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, [grid]);
+
+    useEffect(() => {
+        const hasFeedback = grid?.some(row => 
+            row.some(cell => cell.isCorrect || cell.isIncorrect)
+        );
+        
+        if (hasFeedback) {
+            setShowFeedback(true);
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+            
+            timeoutRef.current = setTimeout(() => {
+                setShowFeedback(false);
+            }, 3000);
+        }
+        
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, [grid]);
+    
     
     const minBoardWidth = grid && grid[0] ? grid[0].length * cellSize : 100;
     const minBoardHeight = grid ? grid.length * cellSize : 100;
-
-    if (!grid || grid.length === 0) {
-        return <Box>Loading crossword...</Box>
-    }
 
     return (
         <Box 
@@ -84,6 +100,8 @@ const CrosswordBoard = () => {
                                 value={cell.value}
                                 number={cell.number}
                                 isActive={isActiveCell(rowIndex, colIndex)}
+                                isCorrect={showFeedback && cell.isCorrect}
+                                isIncorrect={showFeedback && cell.isIncorrect}
                                 isBlocked={cell.isBlocked}
                                 onClick={() => handleClick(rowIndex, colIndex)}
                                 width={cellSize}

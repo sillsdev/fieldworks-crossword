@@ -4,7 +4,14 @@ import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
 
 function App() {
-  const { handleCheckClick, handleClueClick, activeClue } = useCrossword();
+  const { 
+    handleCheckClick, 
+    handleClueClick, 
+    activeClue, 
+    grid, 
+    handleClick, 
+    isActiveCell 
+  } = useCrossword();
   return (
     <Container 
       sx={{ 
@@ -44,7 +51,11 @@ function App() {
             mt: { xs: 2, sm: 4 } 
           }}
         >
-          <CrosswordBoard />
+          <CrosswordBoard
+            grid={grid}
+            handleClick={handleClick}
+            isActiveCell={isActiveCell}
+           />
           <Button 
             onClick={handleCheckClick}
             variant="contained"

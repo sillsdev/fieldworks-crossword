@@ -40,8 +40,8 @@ const CellContainer = styled(Box, {
     : isIncorrect
       ? `2px solid ${theme.palette.error.main}`
       : isActive
-        ? `1px solid ${theme.palette.primary.main}`
-        : `1px solid ${theme.palette.divider}`,
+        ? `2px solid ${theme.palette.primary.main}`
+        : `2px solid ${theme.palette.divider}`,
   backgroundColor: isBlocked 
     ? theme.palette.grey[900]
     : theme.palette.background.paper,

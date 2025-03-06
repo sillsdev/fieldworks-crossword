@@ -164,14 +164,8 @@ export function useCrossword(): UseCrosswordReturn {
         })
         setWords(wordsList);
         setGrid(newGrid);
-        console.log("from useeffect", newGrid);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    useEffect(() => {
-        console.log("second useeffect", grid[0]);
-        gridRef.current = grid;
-    }, [grid]);
 
     const handleClueClick = useCallback((type: 'across' | 'down', number: number) => {
         setActiveClue({ type, number });
@@ -236,7 +230,6 @@ export function useCrossword(): UseCrosswordReturn {
                 result.incomplete++;
             }
         });
-        console.log("newGrid", newGrid);
         setGrid(newGrid);
         return result;
     }, [grid]);
@@ -260,7 +253,6 @@ export function useCrossword(): UseCrosswordReturn {
             const newGrid = [...grid];
             newGrid[row][col].value = key.toUpperCase();
             setGrid(newGrid);
-            console.log(newGrid);
         } else if (key === 'ArrowUp' && row > 0) {
             setActiveCell({ row: row - 1, col });
         } else if (key === 'ArrowDown' && row < grid.length - 1) {
@@ -291,6 +283,6 @@ export function useCrossword(): UseCrosswordReturn {
         handleClueClick,
         activeClue,
         handleKeyDown,
-        handleClick
+        handleClick,
     };
 }

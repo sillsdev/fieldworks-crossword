@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-//import testData from '../test.json';
 
 export interface CellData {
     value: string;
@@ -47,8 +46,6 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         down: Array<{ number: number; clue: string }>;
       }>({ across: [], down: [] });
     const [grid, setGrid] = useState<CellData[][]>([]);
-    const [width, setWidth] = useState<number>(5);
-    const [height, setHeight] = useState<number>(5);
     const [activeCell, setActiveCell] = useState<ActiveCellPosition | null>(null);
     const [activeDirection, setActiveDirection] = useState<Direction>('across');
     const [words, setWords] = useState<Word[]>([]);
@@ -71,10 +68,6 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
     
     useEffect(() => {
         if (crosswordData) {
-            console.log("Crossword data!!!", crosswordData);
-            setWidth(crosswordData.cols);
-            setHeight(crosswordData.rows);
-
             const acrossClues: Array<{ number: number; clue: string }> = [];
             const downClues: Array<{ number: number; clue: string }> = [];
 
@@ -123,7 +116,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
 
                 for (let i = 0; i < answer.length; i++) {
                     if (orientation === 'across') {
-                        if (x + i < width && y < height) {
+                        if (x + i < crosswordData.cols && y < crosswordData.rows) {
                             const cellRow = y;
                             const cellCol = x + i;
                             
@@ -143,7 +136,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
                             };
                         }
                     } else { // down
-                        if (x < width && y + i < height) {
+                        if (x < crosswordData.cols && y + i < crosswordData.rows) {
                             const cellRow = y + i;
                             const cellCol = x;
                             
@@ -169,7 +162,6 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
             setWords(wordsList);
             setGrid(newGrid);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [crosswordData]);
 
     const handleClueClick = useCallback((type: 'across' | 'down', number: number) => {

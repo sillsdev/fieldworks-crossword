@@ -20,7 +20,6 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
         const loadLanguages = async () => {
           try {
             const fetchedLanguages = await fetchLanguages();
-            console.log("Languages fetched:", fetchedLanguages);
             if (fetchedLanguages) {
               setMenuLanguages(fetchedLanguages);
             }
@@ -41,7 +40,6 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
           try {
             const crosswordData = await generateCrossword(selected.projectName, selected.languageCode);
             if (crosswordData) {
-                console.log("Crossword data received:", crosswordData);
                 onCrosswordGenerated(crosswordData);
             }
           } catch (err) {

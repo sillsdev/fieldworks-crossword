@@ -72,6 +72,7 @@ app.get("/generate-crossword", async (req, res) => {
         }));
         var layout = generateLayout(input);
         console.log("Printing layout", layout);
+        res.json(layout);
     } catch (error) {
         console.error("Error fetching data:", error.message);
     }

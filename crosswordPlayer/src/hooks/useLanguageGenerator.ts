@@ -1,16 +1,10 @@
-import { useState } from 'react';
-
-interface LanguageData {
-  languageCode: string;
-  projectName: string;
-}
+import { useState, useCallback } from 'react';
 
 const useLanguageGenerator = () => {
-  const [languages, setLanguages] = useState<LanguageData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLanguages = async () => {
+  const fetchLanguages = useCallback(async () => {
     try {
       setLoading(true);
       setError(null); // Clear any previous errors
@@ -37,16 +31,16 @@ const useLanguageGenerator = () => {
       }
       
       const validLanguages = data.filter(lang => lang !== null);
-      setLanguages(validLanguages);
+      return validLanguages;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch languages');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
 
-  return { languages, loading, error, fetchLanguages };
+  return { loading, error, fetchLanguages };
 };
 
 export default useLanguageGenerator;

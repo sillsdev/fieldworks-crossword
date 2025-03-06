@@ -1,14 +1,6 @@
 import { Box, Typography, List, ListItem } from '@mui/material';
 import useClueInteraction from '../../hooks/useClueInteraction';
-
-interface CrosswordCluesProps {
-  clues: {
-    across: Array<{ number: number; clue: string }>;
-    down: Array<{ number: number; clue: string }>;
-  };
-  onClueClick?: (type: 'across' | 'down', number: number) => void;
-  activeClue?: { type: 'across' | 'down'; number: number } | null;
-}
+import { CrosswordCluesProps } from '../../types/types';
 
 const Clue = ({ 
   type, 

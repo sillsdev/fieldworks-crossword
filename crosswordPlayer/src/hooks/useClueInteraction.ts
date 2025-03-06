@@ -1,12 +1,6 @@
 import { useCallback } from 'react';
 import { Theme } from '@mui/material/styles';
-
-interface UseClueInteractionProps {
-  isActive: boolean;
-  onClueClick?: (type: 'across' | 'down', number: number) => void;
-  type: 'across' | 'down';
-  number: number;
-}
+import { UseClueInteractionProps } from '../types/types';
 
 const useClueInteraction = ({ isActive, onClueClick, type, number }: UseClueInteractionProps) => {
   const handleClick = useCallback(() => {

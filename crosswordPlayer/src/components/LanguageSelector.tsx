@@ -7,8 +7,12 @@ interface LanguageData {
     projectName: string;
 }
 
-const LanguageSelector = () => {
-    const { fetchLanguages, loading, error } = useLanguageGenerator(); 
+interface LanguageSelectorProps {
+    onCrosswordGenerated: (crosswordData: any) => void;
+}
+
+const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
+    const { fetchLanguages, loading, error, generateCrossword } = useLanguageGenerator(); 
     const [menuLanguages, setMenuLanguages] = useState<LanguageData[]>([]);
     const [selectedLanguage, setSelectedLanguage] = useState<string>("");
 
@@ -28,13 +32,21 @@ const LanguageSelector = () => {
         loadLanguages();
     }, [fetchLanguages]);
 
-    const handleLanguageChange = (event: SelectChangeEvent) => {
+    const handleLanguageChange = async (event: SelectChangeEvent) => {
         const value = event.target.value;
         const selected = menuLanguages.find(lang => `${lang.projectName}-${lang.languageCode}` === value);
         
         if (selected) {
           setSelectedLanguage(value);
-          console.log(`Selected project: ${selected.projectName}, language code: ${selected.languageCode}`);
+          try {
+            const crosswordData = await generateCrossword(selected.projectName, selected.languageCode);
+            if (crosswordData) {
+                console.log("Crossword data received:", crosswordData);
+                onCrosswordGenerated(crosswordData);
+            }
+          } catch (err) {
+            console.error("Error generating crossword:", err);
+          }
         }
     };
 

@@ -3,16 +3,24 @@ import CrosswordBoard from './components/Crossword/CrosswordBoard';
 import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
 import LanguageSelector from './components/LanguageSelector';
+import { useState } from 'react';
 
 function App() {
+  const [crosswordData, setCrosswordData] = useState<any>(null);
+
   const { 
     handleCheckClick, 
     handleClueClick, 
     activeClue, 
     grid, 
     handleClick, 
-    isActiveCell 
-  } = useCrossword();
+    isActiveCell,
+    formattedClues
+  } = useCrossword(crosswordData);
+
+  const handleCrosswordGenerated = (data: any) => {
+    setCrosswordData(data);
+  };
 
   return (
     <Container 
@@ -28,7 +36,7 @@ function App() {
         pt: 4
       }}
     >
-      <LanguageSelector />
+      <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
       <Box sx={{ 
         width: '100%',
         maxWidth: 600,
@@ -78,6 +86,7 @@ function App() {
       {/* Crossword clues */}
       <Box sx={{ width: '100%', maxWidth: 600, mt: 3 }}>
         <CrosswordClues 
+          clues={formattedClues}
           onClueClick={handleClueClick}
           activeClue={activeClue}
         />

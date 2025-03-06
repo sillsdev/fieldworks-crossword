@@ -1,12 +1,20 @@
 import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 
 const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
     const [cellSize, setCellSize] = useState(40); 
     const containerRef = useRef<HTMLDivElement>(null);
     const [showFeedback, setShowFeedback] = useState(false);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    
+    // Calculate grid dimensions only when row/column count changes
+    const gridDimensions = useMemo(() => {
+        return {
+            rows: grid?.length || 0,
+            cols: grid?.[0]?.length || 0
+        };
+    }, [grid?.length, grid?.[0]?.length]);
     
     useEffect(() => {
         if (!grid || grid.length === 0 || !containerRef.current) return;
@@ -33,7 +41,7 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
         
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [grid]);
+    }, [gridDimensions]);
 
     useEffect(() => {
         const hasFeedback = grid?.some(row => 
@@ -103,7 +111,7 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                                 isCorrect={showFeedback && cell.isCorrect}
                                 isIncorrect={showFeedback && cell.isIncorrect}
                                 isBlocked={cell.isBlocked}
-                                onClick={() => handleClick(rowIndex, colIndex)}
+                                onClick={cell.isBlocked ? undefined : () => handleClick(rowIndex, colIndex)}
                                 width={cellSize}
                                 height={cellSize}
                             />

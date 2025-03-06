@@ -48,7 +48,7 @@ const CellContainer = styled(Box, {
   cursor: isBlocked ? 'default' : 'pointer',
   userSelect: 'none',
   '&:focus': {
-    outline: `2px solid ${theme.palette.primary.main}`,
+    outline: isBlocked ? 'none' : `2px solid ${theme.palette.primary.main}`,
     outlineOffset: -2,
   },
 }));

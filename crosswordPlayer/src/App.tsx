@@ -1,35 +1,81 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Container, Box, Typography, Button } from '@mui/material';
+import CrosswordBoard from './components/Crossword/CrosswordBoard';
+import CrosswordClues from './components/Crossword/CrosswordClues';
+import { useCrossword } from './hooks/useCrossword';
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const { 
+    handleCheckClick, 
+    handleClueClick, 
+    activeClue, 
+    grid, 
+    handleClick, 
+    isActiveCell 
+  } = useCrossword();
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Container 
+      sx={{ 
+        width: '100vw',
+        height: '100vh', 
+        display: 'flex', 
+        justifyContent: 'center',
+        alignItems: 'center',
+        px: { xs: 2, sm: 4 },
+        py: 2,
+        pt: 8
+      }}
+    >
+      <Box sx={{ 
+        width: '100%',
+        maxWidth: 600,
+        textAlign: 'center',
+        padding: { xs: 2, sm: 4 },
+        borderRadius: 2,
+        boxShadow: 3,
+        backgroundColor: 'background.paper',
+      }}>
+        <Typography 
+          variant="h4" 
+          component="h1" 
+          gutterBottom 
+          sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}
+        >
+          Crossword Puzzle
+        </Typography>
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            mt: { xs: 2, sm: 4 } 
+          }}
+        >
+          <CrosswordBoard
+            grid={grid}
+            handleClick={handleClick}
+            isActiveCell={isActiveCell}
+           />
+          <Button 
+            onClick={handleCheckClick}
+            variant="contained"
+            sx={{ 
+              mt: 2, 
+              width: 'fit-content',
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1, sm: 1.5 },
+            }}
+          >
+            Check
+          </Button>
+        </Box>
+      </Box>
+      { <CrosswordClues 
+          onClueClick={handleClueClick}
+          activeClue={activeClue}
+      /> }
+    </Container>
   )
 }
 
-export default App
+export default App;

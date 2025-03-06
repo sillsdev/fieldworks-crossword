@@ -1,0 +1,18 @@
+[
+    {
+      "clue": "Opposite of cold",
+      "answer": "hot",
+      "startx": 1,
+      "starty": 1,
+      "position": 1,
+      "orientation": "across"
+    },
+    {
+      "clue": "Place to sleep",
+      "answer": "bed",
+      "startx": 1,
+      "starty": 1,
+      "position": 2,
+      "orientation": "down"
+    }
+  ]

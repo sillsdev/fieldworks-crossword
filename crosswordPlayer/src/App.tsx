@@ -82,8 +82,6 @@ function App() {
           </Button>
         </Box>
       </Box>
-      
-      {/* Crossword clues */}
       <Box sx={{ width: '100%', maxWidth: 600, mt: 3 }}>
         <CrosswordClues 
           clues={formattedClues}

@@ -36,15 +36,19 @@ const CellContainer = styled(Box, {
   justifyContent: 'center',
   alignItems: 'center',
   border: isCorrect
-    ? `2px solid ${theme.palette.success.main}`
+    ? `2px solid darkgreen`
     : isIncorrect
-      ? `2px solid ${theme.palette.error.main}`
+      ? `2px solid darkred`
       : isActive
         ? `2px solid ${theme.palette.primary.main}`
         : `2px solid ${theme.palette.divider}`,
-  backgroundColor: isBlocked 
-    ? theme.palette.grey[900]
-    : theme.palette.background.paper,
+  backgroundColor: isCorrect
+    ? 'palegreen'
+    : isIncorrect
+      ? 'lightcoral'
+      : isBlocked 
+        ? theme.palette.grey[900]
+        : theme.palette.background.paper,
   cursor: isBlocked ? 'default' : 'pointer',
   userSelect: 'none',
   '&:focus': {
@@ -53,19 +57,21 @@ const CellContainer = styled(Box, {
   },
 }));
 
-const CellNumber = styled(Typography)({
+const CellNumber = styled(Typography)<{ isCorrect?: boolean; isIncorrect?: boolean }>(({ isCorrect, isIncorrect }) => ({
   position: 'absolute',
   top: 2,
   left: 2,
   fontSize: '0.7rem',
   fontWeight: 'bold',
-});
+  color: isCorrect ? 'darkgreen' : isIncorrect ? 'darkred' : 'inherit',
+}));
 
-const CellContent = styled(Typography)({
+const CellContent = styled(Typography)<{ isCorrect?: boolean; isIncorrect?: boolean }>(({ isCorrect, isIncorrect }) => ({
   fontSize: '1.2rem',
   fontWeight: 'bold',
   textTransform: 'uppercase',
-});
+  color: isCorrect ? 'darkgreen' : isIncorrect ? 'darkred' : 'inherit',
+}));
 
 const CrosswordCell: React.FC<CrosswordCellProps> = ({
   value,
@@ -92,8 +98,8 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
       tabIndex={isBlocked ? -1 : 0}
       aria-label={`${number ? `Cell ${number}, ` : ''}${value ? `Letter ${value}` : 'Empty cell'}`}
     >
-      {number && <CellNumber variant="caption">{number}</CellNumber>}
-      <CellContent variant="body1">{!isBlocked ? value : ''}</CellContent>
+      {number && <CellNumber variant="caption" isCorrect={isCorrect} isIncorrect={isIncorrect}>{number}</CellNumber>}
+      <CellContent variant="body1" isCorrect={isCorrect} isIncorrect={isIncorrect}>{!isBlocked ? value : ''}</CellContent>
     </CellContainer>
   );
 };

@@ -1,4 +1,4 @@
-import { Container, Box, Typography, Button, Grid } from '@mui/material';
+import { Container, Box, Typography, Button } from '@mui/material';
 import CrosswordBoard from './components/Crossword/CrosswordBoard';
 import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
@@ -33,14 +33,13 @@ function App() {
         alignItems: 'center',
         px: { xs: 2, sm: 4 },
         py: 2,
-        pt: 8,
-        boxSizing: 'border-box'
+        pt: 4
       }}
     >
       <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
       <Box sx={{ 
         width: '100%',
-        maxWidth: 1200,
+        maxWidth: 600,
         textAlign: 'center',
         padding: { xs: 2, sm: 4 },
         borderRadius: 2,
@@ -55,26 +54,25 @@ function App() {
         >
           Crossword Puzzle
         </Typography>
-        <Grid container spacing={2} justifyContent="center" alignItems="center">
-          <Grid item xs={12} md={8} sx={{ display: 'flex', justifyContent: 'center' }}>
-            <CrosswordBoard
-              grid={grid}
-              handleClick={handleClick}
-              isActiveCell={isActiveCell}
-            />
-          </Grid>
-          <Grid item xs={12} md={4} sx={{ display: 'flex', justifyContent: 'center' }}>
-            <CrosswordClues 
-              onClueClick={handleClueClick}
-              activeClue={activeClue}
-            />
-          </Grid>
-        </Grid>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            mt: { xs: 2, sm: 4 } 
+          }}
+        >
+          <CrosswordBoard
+            grid={grid}
+            handleClick={handleClick}
+            isActiveCell={isActiveCell}
+           />
           <Button 
             onClick={handleCheckClick}
             variant="contained"
             sx={{ 
+              mt: 2, 
               width: 'fit-content',
               px: { xs: 2, sm: 3 },
               py: { xs: 1, sm: 1.5 },

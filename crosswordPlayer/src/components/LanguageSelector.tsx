@@ -3,8 +3,12 @@ import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } fro
 import useLanguageGenerator from '../hooks/useLanguageGenerator';
 
 interface LanguageData {
-    languageCode: string;
+    languageCode: {
+        languageName: string;
+        analysisLanguages: string[];
+    };
     projectName: string;
+    analysisLanguage?: string;
 }
 
 interface LanguageSelectorProps {
@@ -21,6 +25,7 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
           try {
             const fetchedLanguages = await fetchLanguages();
             if (fetchedLanguages) {
+              console.log("Fetched languages:", fetchedLanguages);
               setMenuLanguages(fetchedLanguages);
             }
           } catch (err) {
@@ -38,7 +43,10 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
         if (selected) {
           setSelectedLanguage(value);
           try {
-            const crosswordData = await generateCrossword(selected.projectName, selected.languageCode);
+            const crosswordData = await generateCrossword(
+                selected.projectName, 
+                selected.languageCode.languageName, 
+                );
             if (crosswordData) {
                 onCrosswordGenerated(crosswordData);
             }
@@ -72,7 +80,7 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
                 key={`${language.projectName}-${language.languageCode}`}
                 value={`${language.projectName}-${language.languageCode}`}
               >
-                {language.projectName} ({language.languageCode})
+                {language.projectName} ({language.languageCode.languageName})
               </MenuItem>
             ))
           )}

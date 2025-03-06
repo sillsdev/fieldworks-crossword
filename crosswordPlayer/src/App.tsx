@@ -1,9 +1,14 @@
-import { Container, Box, Typography, Button, Menu, MenuItem } from '@mui/material';
+import { Container, Box, Typography, Button, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import CrosswordBoard from './components/Crossword/CrosswordBoard';
 import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
 import useLanguageGenerator from './hooks/useLanguageGenerator';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+interface LanguageData {
+  languageCode: string;
+  projectName: string;
+}
 
 function App() {
   const { 
@@ -15,25 +20,36 @@ function App() {
     isActiveCell 
   } = useCrossword();
 
-  const { fetchLanguages, languages } = useLanguageGenerator(); 
+  const { fetchLanguages, loading, error } = useLanguageGenerator(); 
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("Select Language");
-  const open = Boolean(anchorEl);
+  const [menuLanguages, setMenuLanguages] = useState<LanguageData[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
 
-  const handleLanguageClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    await fetchLanguages();
-    setAnchorEl(event.currentTarget);
-  };
+  // Fetch languages on component mount
+  useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const fetchedLanguages = await fetchLanguages();
+        console.log("Languages fetched:", fetchedLanguages);
+        if (fetchedLanguages) {
+          setMenuLanguages(fetchedLanguages);
+        }
+      } catch (err) {
+        console.error("Error fetching languages:", err);
+      }
+    };
+    
+    loadLanguages();
+  }, [fetchLanguages]);
   
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-  
-  const handleLanguageSelect = (projectName: string, languageCode: string) => {
-    setSelectedLanguage(projectName);
-    handleClose();
-    console.log(`Selected project: ${projectName}, language code: ${languageCode}`);
+  const handleLanguageChange = (event: SelectChangeEvent) => {
+    const value = event.target.value;
+    const selected = menuLanguages.find(lang => `${lang.projectName}-${lang.languageCode}` === value);
+    
+    if (selected) {
+      setSelectedLanguage(value);
+      console.log(`Selected project: ${selected.projectName}, language code: ${selected.languageCode}`);
+    }
   };
 
   return (
@@ -42,13 +58,47 @@ function App() {
         width: '100vw',
         height: '100vh', 
         display: 'flex', 
-        justifyContent: 'center',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         px: { xs: 2, sm: 4 },
         py: 2,
-        pt: 8
+        pt: 4
       }}
     >
+      {/* Language selector */}
+      <Box sx={{ width: '100%', maxWidth: 600, mb: 3 }}>
+        <FormControl fullWidth size="small">
+          <InputLabel id="language-select-label">Select Language</InputLabel>
+          <Select
+            labelId="language-select-label"
+            id="language-select"
+            value={selectedLanguage}
+            label="Select Language"
+            onChange={handleLanguageChange}
+            disabled={loading}
+          >
+            {loading ? (
+              <MenuItem disabled>Loading languages...</MenuItem>
+            ) : error ? (
+              <MenuItem disabled>Error: {error}</MenuItem>
+            ) : menuLanguages.length === 0 ? (
+              <MenuItem disabled>No languages available</MenuItem>
+            ) : (
+              menuLanguages.map((language) => (
+                <MenuItem
+                  key={`${language.projectName}-${language.languageCode}`}
+                  value={`${language.projectName}-${language.languageCode}`}
+                >
+                  {language.projectName} ({language.languageCode})
+                </MenuItem>
+              ))
+            )}
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* Crossword puzzle */}
       <Box sx={{ 
         width: '100%',
         maxWidth: 600,
@@ -94,35 +144,16 @@ function App() {
           </Button>
         </Box>
       </Box>
-      <Box>
-        <Button
-          onClick={handleLanguageClick}
-          variant="outlined"
-        >
-          {selectedLanguage}
-        </Button>
-        <Menu
-          id="language-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-        >
-          {languages.map((language) => (
-            <MenuItem
-              key={language.projectName}
-              onClick={() => handleLanguageSelect(language.projectName, language.languageCode)}
-            >
-              {language.languageCode}
-            </MenuItem>
-          ))}
-        </Menu>
-      </Box>
-      { <CrosswordClues 
+      
+      {/* Crossword clues */}
+      <Box sx={{ width: '100%', maxWidth: 600, mt: 3 }}>
+        <CrosswordClues 
           onClueClick={handleClueClick}
           activeClue={activeClue}
-      /> }
+        />
+      </Box>
     </Container>
-  )
+  );
 }
 
 export default App;

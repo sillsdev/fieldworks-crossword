@@ -32,7 +32,13 @@ const useLanguageGenerator = () => {
         throw new Error("Invalid data format received from server");
       }
       
-      const validLanguages = data.filter(lang => lang !== null);
+      const validLanguages = data
+        .filter(item => item !== null)
+        .map(item => ({
+            languageCode: item.languageCode,
+            projectName: item.projectName,
+            analysisLanguage: item.analysisLanguage,
+        }));      
       return validLanguages;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch languages');
@@ -47,7 +53,8 @@ const useLanguageGenerator = () => {
         setCrosswordError(null);
 
         console.log("Generating crossword");
-        const response = await fetch(`http://localhost:3000/generate-crossword?projectName=${encodeURIComponent(projectName)}&projectCode=${encodeURIComponent(projectCode)}`, {
+        const response = await fetch(
+            `http://localhost:3000/generate-crossword?projectName=${encodeURIComponent(projectName)}&languageCode=${encodeURIComponent(projectCode)}`, {
             method: 'GET', 
             headers: {
                 'Accept': 'application/json',

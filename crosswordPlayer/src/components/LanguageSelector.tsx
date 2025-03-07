@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { Box, /**FormControl, InputLabel, Select, MenuItem, SelectChangeEvent**/ } from '@mui/material';
 import useLanguageGenerator from '../hooks/useLanguageGenerator';
 import { LanguageData, LanguageSelectorProps } from '../types/types';
 import {
@@ -9,7 +9,7 @@ import {
 } from "mui-language-picker";
 
 const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
-    const { fetchLanguages, loading, error, generateCrossword } = useLanguageGenerator(); 
+    const { fetchLanguages, /**loading, error,**/ generateCrossword } = useLanguageGenerator(); 
     const [menuLanguages, setMenuLanguages] = useState<LanguageData[]>([]);
     const [selectedLanguage, setSelectedLanguage] = useState<string>("");
     
@@ -24,7 +24,6 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
           try {
             const fetchedLanguages = await fetchLanguages();
             if (fetchedLanguages) {
-              console.log("Fetched languages:", fetchedLanguages);
               setMenuLanguages(fetchedLanguages);
             }
           } catch (err) {

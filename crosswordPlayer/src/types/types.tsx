@@ -18,6 +18,7 @@ export interface CrosswordCellProps {
     isBlocked?: boolean;
     isCorrect?: boolean;
     isIncorrect?: boolean;
+    isPartOfActiveWord?: boolean;
     onClick?: (event: React.MouseEvent) => void;
     onKeyDown?: (event: React.KeyboardEvent) => void;
     width?: number;

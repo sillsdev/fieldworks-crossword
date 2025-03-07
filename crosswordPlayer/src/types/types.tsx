@@ -12,9 +12,16 @@ export interface LanguageSelectorProps {
     selectedProject: string;
     selectedLanguage: string;
     selectedAnalysis: string;
+    selectedPublication: string;
     setSelectedProject: (project: string) => void;
     setSelectedLanguage: (language: string) => void;
     setSelectedAnalysis: (analysis: string) => void;
+    setSelectedPublication: (publication: string) => void;
+}
+
+export interface Publication {
+    publicationName: string;
+    publicationID: string;
 }
 
 export interface CrosswordCellProps {

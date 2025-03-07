@@ -15,6 +15,7 @@ const App = () => {
   const [selectedProject, setSelectedProject] = useState<string>('');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
   const [selectedAnalysis, setSelectedAnalysis] = useState<string>('');
+  const [selectedPublication, setSelectedPublication] = useState<string>('');
 
   const { 
     handleCheckClick, 
@@ -28,7 +29,7 @@ const App = () => {
     activeCell,
     activeDirection, 
     correctWords,
-    handleShowAnswers // Add this line
+    handleShowAnswers 
   } = useCrossword(crosswordData);
 
   const handleOpenLanguageSelector = () => {
@@ -95,9 +96,11 @@ const App = () => {
               selectedProject={selectedProject}
               selectedLanguage={selectedLanguage}
               selectedAnalysis={selectedAnalysis}
+              selectedPublication={selectedPublication}
               setSelectedProject={setSelectedProject}
               setSelectedLanguage={setSelectedLanguage}
               setSelectedAnalysis={setSelectedAnalysis}
+              setSelectedPublication={setSelectedPublication}
             />          
           </Box>
         </DialogContent>

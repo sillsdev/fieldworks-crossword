@@ -25,7 +25,7 @@
 
 ## To start up the web server
 1. Download "mini-lcm-sdk-win-v2.zip" in the [Google Drive](https://drive.google.com/drive/folders/1xR8uiafXRHmiZ039AQASbh3HgxSHbOm0?usp=sharing)
-2. Unzip the file and run ```FwLiteWeb.exe``` in a temrinal window and it should startup on port 49279
+2. Unzip the file and run ```FwLiteWeb.exe``` in a terminal window and it should startup on port 49279
 3. Settings are configured in appsettings.Production.json
 4. Open a browser and go to http://localhost:49279/swagger to view the swagger docs
 
@@ -38,6 +38,7 @@
 ## To run the back-end server, use the following command:
 2. Run ```node server.js``` in a new terminal window
 3. It should show "Server Listening on Port: 3000"
+4. Note: For testing purposes, the CORS policy is set to accept particular ports (5173 and 5174)
 
 ## License
 This project is licensed under the [MIT License](LICENSE).
@@ -47,6 +48,9 @@ This project is licensed under the [MIT License](LICENSE).
 - Isabel Luke
 - Hannah VanGeest
 - Rebekah
+
+## Future work
+- 
 
 ## Acknowledgments
 This open-source library gave the team inspirations for the back-end design: https://github.com/MichaelWehar/Crossword-Layout-Generator.git

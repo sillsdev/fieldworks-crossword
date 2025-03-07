@@ -91,7 +91,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
                             newGrid[cellRow][cellCol].wordId?.push(wordId);
                             newGrid[cellRow][cellCol] = {
                                 ...newGrid[cellRow][cellCol],
-                                value: answer[i], 
+                                value: '', 
                                 isBlocked: false,
                                 number: i === 0 ? position : newGrid[cellRow][cellCol].number
                             };
@@ -111,7 +111,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
                             newGrid[cellRow][cellCol].wordId?.push(wordId);
                             newGrid[cellRow][cellCol] = {
                                 ...newGrid[cellRow][cellCol],
-                                value: answer[i], 
+                                value: '', 
                                 isBlocked: false,
                                 number: i === 0 ? position : newGrid[cellRow][cellCol].number
                             };
@@ -202,16 +202,11 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
 
     const handleKeyDown = (event: KeyboardEvent) => {
         if (!activeCell) return;
-
+    
         const { row, col } = activeCell;
         const key = event.key;
-
-        if (key.length === 1 && /^[a-zA-Z]$/.test(key)) {
-            // Only allow one letter at a time
-            const newGrid = [...grid];
-            newGrid[row][col].value = key.toUpperCase();
-            setGrid(newGrid);
-        } else if (key === 'ArrowUp' && row > 0) {
+    
+        if (key === 'ArrowUp' && row > 0) {
             setActiveCell({ row: row - 1, col });
         } else if (key === 'ArrowDown' && row < grid.length - 1) {
             setActiveCell({ row: row + 1, col });
@@ -219,8 +214,12 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
             setActiveCell({ row, col: col - 1 });
         } else if (key === 'ArrowRight' && col < grid[0].length - 1) {
             setActiveCell({ row, col: col + 1 });
+        } else if (key.length === 1) {
+            const newGrid = [...grid];
+            newGrid[row][col].value = key.toUpperCase();
+            setGrid(newGrid);
         }
-    };
+    };       
 
     const handleClick = (row: number, col: number) => {
         setActiveCell({ row, col });
@@ -233,6 +232,15 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         };
     });
 
+    const handleInput = useCallback((character: string) => {
+        if (!activeCell) return;
+        
+        const { row, col } = activeCell;
+        const newGrid = [...grid];
+        newGrid[row][col].value = character.toUpperCase();
+        setGrid(newGrid);
+    }, [activeCell, grid]);
+
     return {
         grid,
         isActiveCell, 
@@ -242,6 +250,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         activeClue,
         handleKeyDown,
         handleClick,
-        formattedClues
+        formattedClues,
+        handleInput
     };
 }

@@ -15,7 +15,8 @@ function App() {
     grid, 
     handleClick, 
     isActiveCell,
-    formattedClues
+    formattedClues,
+    handleInput
   } = useCrossword(crosswordData);
 
   const handleCrosswordGenerated = (data: any) => {
@@ -67,6 +68,7 @@ function App() {
             grid={grid}
             handleClick={handleClick}
             isActiveCell={isActiveCell}
+            handleInput={handleInput}
            />
           <Button 
             onClick={handleCheckClick}

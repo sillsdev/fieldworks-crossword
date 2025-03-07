@@ -2,12 +2,20 @@ import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
 import { useEffect, useState, useRef } from 'react';
 
-const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
+const CrosswordBoard = ({ grid, handleClick, isActiveCell, handleInput }) => {
     const [cellSize, setCellSize] = useState(40); 
     const containerRef = useRef<HTMLDivElement>(null);
     const [showFeedback, setShowFeedback] = useState(false);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    },[isActiveCell]);
+
     useEffect(() => {
         if (!grid || grid.length === 0 || !containerRef.current) return;
         
@@ -71,6 +79,28 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                 alignItems: 'center',
             }}
         >
+            <input
+                ref={inputRef}
+                type="text"
+                style={{ 
+                    position: 'absolute', 
+                    opacity: 0, 
+                    pointerEvents: 'none' 
+                }}
+                onCompositionEnd={(e) => {
+                    const finalChar = e.data.slice(-1);
+                    handleInput(finalChar);
+                    e.currentTarget.value = '';
+                }}
+                onChange={(e) => {
+                    if (e.target.value) {
+                        const char = e.target.value.slice(-1);
+                        handleInput(char);
+                        e.target.value = '';
+                    }
+                }}
+                autoFocus
+            />
             <Box
                 ref={containerRef}
                 sx={(theme) => ({
@@ -85,7 +115,7 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                     margin: 'auto',
                 })}
             >
-                {grid.map((row, rowIndex) => (
+                {grid.map((row, rowIndex: number) => (
                     <Box 
                         key={rowIndex} 
                         sx={{
@@ -94,7 +124,7 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                             width: '100%',
                         }}
                     >
-                        {row.map((cell, colIndex) => (
+                        {row.map((cell, colIndex: number) => (
                             <CrosswordCell 
                                 key={`cell-${rowIndex}-${colIndex}`}
                                 value={cell.value}

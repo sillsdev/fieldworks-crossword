@@ -197,6 +197,7 @@ const App = () => {
           <Button 
             onClick={handleCheckClick}
             variant="contained"
+            color="secondary"
             sx={{ 
               width: 'fit-content',
               px: { xs: 2, sm: 3 },
@@ -208,14 +209,13 @@ const App = () => {
           <Button 
             onClick={handleShowAnswers}
             variant="contained"
-            color="secondary"
             sx={{ 
               width: 'fit-content',
               px: { xs: 2, sm: 3 },
               py: { xs: 1, sm: 1.5 },
             }}
           >
-            Answers
+            Solve
           </Button>
           <Button 
             onClick={handleGenerateNewPuzzle}

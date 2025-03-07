@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Button } from '@mui/material';
+import { 
+    Typography, 
+    Box, 
+    FormControl, 
+    InputLabel, 
+    Select, 
+    MenuItem, 
+    SelectChangeEvent, 
+    Button 
+} from '@mui/material';
 import useLanguageGenerator from '../hooks/useLanguageGenerator';
 import { LanguageSelectorProps } from '../types/types';
 
@@ -19,7 +28,6 @@ const LanguageSelector = ({
         fetchAnalysisLanguages
      } = useLanguageGenerator(); 
     const [projects, setProjects] = useState<string[]>([]);
-    const [menuLanguages, setMenuLanguages] = useState<string[]>([]);
     const [analysisLanguages, setAnalysisLanguages] = useState<string[]>([]);
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
@@ -49,30 +57,22 @@ const LanguageSelector = ({
             try {
                 const languages = await fetchVernacularLanguages(value);
                 if (languages) {
-                    const languageCodes = languages.flat().filter(Boolean);
-                    setMenuLanguages(languageCodes);
+                    const languageCode = languages.flat().filter(Boolean)[0];
+                    setSelectedLanguage(languageCode);
+
+                    try {
+                        const analysisLanguages = await fetchAnalysisLanguages(value);
+                        if (analysisLanguages) {
+                            const languages = analysisLanguages.flat().filter(Boolean);
+                            setAnalysisLanguages(languages);
+                        }
+                    } catch (err) {
+                        console.error("Error fetching analysis languages:", err);
+                    }
                 }
             } catch (err) {
                 console.error("Error fetching languages:", err);
             }
-        }
-    };
-
-    const handleLanguageChange = async (event: SelectChangeEvent) => {
-        const value = event.target.value;
-        
-        if (value) {
-          setSelectedLanguage(value);
-
-          try {
-            const analysisLanguages = await fetchAnalysisLanguages(selectedProject);
-            if (analysisLanguages) {
-                const languages = analysisLanguages.flat().filter(Boolean);
-                setAnalysisLanguages(languages);
-            }
-          } catch (err) {
-            console.error("Error generating crossword:", err);
-          }
         }
     };
 
@@ -127,31 +127,17 @@ const LanguageSelector = ({
                 </Select>
             </FormControl> 
 
-            <FormControl 
-                fullWidth 
-                size="small" 
-                sx={{ mb: 2 }}
-                disabled={!selectedProject || menuLanguages.length === 0}
-            >
-                <InputLabel id="language-select-label">Select Language</InputLabel>
-                <Select
-                    labelId="language-select-label"
-                    id="language-select"
-                    value={selectedLanguage}
-                    label="Select Language"
-                    onChange={handleLanguageChange}
-                >
-                    {menuLanguages.map((language) => (
-                        <MenuItem
-                            key={language}
-                            value={language}
-                        >
-                            {language}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-
+            {selectedLanguage && (
+                <Box sx={{ mb: 2, p: 1.5, border: '1px solid #ccc', borderRadius: 1 }}>
+                    <Typography variant="body2" color="text.secondary">
+                        Selected Language
+                    </Typography>
+                    <Typography variant="body1">
+                        {selectedLanguage}
+                    </Typography>
+                </Box>
+            )}
+            
             <FormControl 
                 fullWidth 
                 size="small" 

@@ -6,9 +6,10 @@ import LanguageSelector from './components/LanguageSelector';
 import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { generateNewCrossword } from './utils/newCrossword';
+import { CrosswordData } from './types/types';
 
 const App = () => {
-  const [crosswordData, setCrosswordData] = useState<any>(null);
+  const [crosswordData, setCrosswordData] = useState<CrosswordData>();
   const theme = useTheme();
   const [isLanguageSelectorOpen, setIsLanguageSelectorOpen] = useState<boolean>(true);
   const [selectedProject, setSelectedProject] = useState<string>('');
@@ -37,7 +38,7 @@ const App = () => {
     setIsLanguageSelectorOpen(false);
   };
 
-  const handleCrosswordGenerated = (data: any) => {
+  const handleCrosswordGenerated = (data: CrosswordData) => {
     setCrosswordData(data);
     setIsLanguageSelectorOpen(false);
   };

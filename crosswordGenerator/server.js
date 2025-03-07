@@ -157,11 +157,11 @@ function chooseRandomWords(dictionaryWords, numWords) {
     return randomWords;
 }
 
-// make sure word does not contain spaces or numbers
-// makes sure it is between 4 and 10 characters long
-// this can be added to if we determine more validation is needed
+// makes sure word does not contain spaces or numbers
+// makes sure word is between 4 and 10 characters long
+    // if publication is provided, make sure word matches
 function validateWord(entry, languageCode, publication) {
-    if (publication && entry.publishIn[0].id !== publication) {
+    if (publication && !entry.publishIn.some(pub => pub.id === publication)) {
         return false;
     }
     let word = "";

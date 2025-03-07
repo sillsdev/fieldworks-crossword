@@ -46,8 +46,8 @@ app.get("/fetch-vernacular-languages", async (req, res) => {
     const apiUrl = `http://localhost:49279/api/mini-lcm/FwData/${req.query.projectName}/writingSystems`;
     try {
         const languageResponse = await axios.get(apiUrl);
-        const vernacularLanguages = languageResponse.data.vernacular.map(vernacularEntry => vernacularEntry.name);
-        res.json(vernacularLanguages);
+        const vernacularLanguage = languageResponse.data.vernacular[0].name;
+        res.json(vernacularLanguage);
     } catch (error) {
         console.error("Error fetching vernacular languages:", error.message);
     }

@@ -1,15 +1,20 @@
-import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Backdrop } from '@mui/material';
+import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import CrosswordBoard from './components/Crossword/CrosswordBoard';
 import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
 import LanguageSelector from './components/LanguageSelector';
 import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
+import { generateNewCrossword } from './utils/newCrossword';
+import { CrosswordData } from './types/types';
 
 const App = () => {
-  const [crosswordData, setCrosswordData] = useState<any>(null);
+  const [crosswordData, setCrosswordData] = useState<CrosswordData>();
   const theme = useTheme();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(true); 
+  const [isLanguageSelectorOpen, setIsLanguageSelectorOpen] = useState<boolean>(true);
+  const [selectedProject, setSelectedProject] = useState<string>('');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+  const [selectedAnalysis, setSelectedAnalysis] = useState<string>('');
 
   const { 
     handleCheckClick, 
@@ -26,17 +31,36 @@ const App = () => {
     handleShowAnswers // Add this line
   } = useCrossword(crosswordData);
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
+  const handleOpenLanguageSelector = () => {
+    setIsLanguageSelectorOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseLanguageSelector = () => {
+    setIsLanguageSelectorOpen(false);
   };
 
-  const handleCrosswordGenerated = (data: any) => {
+  const handleCrosswordGenerated = (data: CrosswordData) => {
     setCrosswordData(data);
-    handleCloseModal(); 
+    setIsLanguageSelectorOpen(false);
+  };
+
+  const handleGenerateNewPuzzle = async () => {
+    if (selectedProject && selectedLanguage && selectedAnalysis) {
+      try {
+        const newCrosswordData = await generateNewCrossword(
+          selectedProject,
+          selectedLanguage,
+          selectedAnalysis
+        );
+        if (newCrosswordData) {
+          setCrosswordData(newCrosswordData);
+        }
+      } catch (err) {
+        console.error("Error generating new crossword:", err);
+      }
+    } else {
+      handleOpenLanguageSelector();
+    }
   };
 
   return (
@@ -53,8 +77,8 @@ const App = () => {
       }}
     >
       <Dialog 
-        open={isModalOpen} 
-        onClose={handleCloseModal}
+        open={isLanguageSelectorOpen} 
+        onClose={handleCloseLanguageSelector}
         fullWidth
         maxWidth="sm"
         BackdropProps={{
@@ -63,14 +87,22 @@ const App = () => {
           },
         }}
       >
-        <DialogTitle>Generate New Puzzle</DialogTitle>
+        <DialogTitle>Select Language</DialogTitle>
         <DialogContent>
           <Box sx={{ py: 2 }}>
-            <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
+            <LanguageSelector 
+              onCrosswordGenerated={handleCrosswordGenerated} 
+              selectedProject={selectedProject}
+              selectedLanguage={selectedLanguage}
+              selectedAnalysis={selectedAnalysis}
+              setSelectedProject={setSelectedProject}
+              setSelectedLanguage={setSelectedLanguage}
+              setSelectedAnalysis={setSelectedAnalysis}
+            />          
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal}>Cancel</Button>
+          <Button onClick={handleCloseLanguageSelector}>Cancel</Button>
         </DialogActions>
       </Dialog>
 
@@ -115,7 +147,7 @@ const App = () => {
               grid={grid}
               handleClick={handleClick}
               isActiveCell={isActiveCell}
-            handleInput={handleInput}
+              handleInput={handleInput}
               activeCell={activeCell} 
               activeDirection={activeDirection} 
             />
@@ -183,7 +215,7 @@ const App = () => {
             Answers
           </Button>
           <Button 
-            onClick={handleOpenModal}
+            onClick={handleGenerateNewPuzzle}
             variant="contained"
             sx={{ 
               width: 'fit-content',
@@ -192,6 +224,17 @@ const App = () => {
             }}
           >
             Generate New Puzzle
+          </Button>
+          <Button 
+            onClick={handleOpenLanguageSelector}
+            variant="contained"
+            sx={{ 
+              width: 'fit-content',
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1, sm: 1.5 },
+            }}
+          >
+            Language Selector
           </Button>
         </Box>
       </Box>

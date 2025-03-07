@@ -40,8 +40,8 @@ const App = () => {
   return (
     <Container 
       sx={{ 
-        width: '100vw',
-        height: '100vh', 
+        width: '95vw',
+        height: '95vh', 
         display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center',

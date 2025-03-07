@@ -1,18 +1,5 @@
 import { Box, Typography, styled } from '@mui/material';
-
-interface CrosswordCellProps {
-  value: string;
-  number?: number;
-  isActive?: boolean;
-  isBlocked?: boolean;
-  isCorrect?: boolean;
-  isIncorrect?: boolean;
-  isPartOfActiveWord?: boolean; // Add this new prop
-  onClick?: (event: React.MouseEvent) => void;
-  onKeyDown?: (event: React.KeyboardEvent) => void;
-  width?: number;
-  height?: number;
-}
+import { CrosswordCellProps } from '../../types/types';
 
 const CellContainer = styled(Box, {
   shouldForwardProp: (prop) => 

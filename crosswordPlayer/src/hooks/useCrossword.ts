@@ -1,44 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-
-export interface CellData {
-    value: string;
-    number?: number;
-    isBlocked: boolean;
-    isCorrect?: boolean;
-    isIncorrect?: boolean;
-    wordId?: string[];
-}
-
-export interface ActiveCellPosition {
-    row: number;
-    col: number;
-}
-
-export type Direction = 'across' | 'down';
-
-export interface Word {
-    id: string;
-    answer: string;
-    clue: string;
-    position: number;
-    orientation: Direction;
-    startRow: number;
-    startCol: number;
-    cells: { row: number, col: number}[];
-}
-
-interface CrosswordData {
-    cols: number;
-    rows: number;
-    result: Array<{
-        answer: string;
-        clue: string;
-        startx: number;
-        starty: number;
-        position: number;
-        orientation: 'across' | 'down';
-    }>;
-}
+import { CrosswordData, CellData, ActiveCellPosition, Direction, Word } from '../types/types';
 
 export const useCrossword = (crosswordData: CrosswordData | null = null) => {
     const [formattedClues, setFormattedClues] = useState<{

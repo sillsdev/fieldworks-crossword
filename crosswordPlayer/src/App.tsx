@@ -14,6 +14,7 @@ const App = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const { generateCrossword } = useLanguageGenerator();
   const [projectName, setProjectName] = useState<string | null>(null);
+  const [analysisLanguage, setAnalysisLanguage] = useState<string | null>(null);
 
   const { 
     handleCheckClick, 
@@ -41,29 +42,25 @@ const App = () => {
     setCrosswordData(data);
     handleCloseLanguageSelector();
     console.log("data", data);
-    // Store the selected language when a crossword is generated
+    // Store all necessary information when a crossword is generated
     if (data) {
-      //setSelectedLanguage(data.languageCode.languageName);
       setProjectName(data.projectName);
+      
+      if (data.language) {
+        setSelectedLanguage(data.language);
+      }
+      
+      if (data.analysisLanguage) {
+        setAnalysisLanguage(data.analysisLanguage);
+      }
     }
   };
 
-  const handleGenerateNewPuzzle = async () => {
-    console.log("projectName", projectName);
-    console.log("selectedLanguage", selectedLanguage);
-    if (projectName && selectedLanguage) {
-      try {
-        const newCrosswordData = await generateCrossword(projectName, selectedLanguage);
-        if (newCrosswordData) {
-          handleCrosswordGenerated(newCrosswordData);
-        }
-      } catch (err) {
-        console.error('Error generating new puzzle:', err);   
-      }
-    } else {
-      handleOpenLanguageSelector();
-    }
-  };
+  // const handleGenerateNewPuzzle = async () => {
+  //   return (
+  //     <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
+  //   )
+  // };
 
   return (
     <Container 
@@ -197,7 +194,7 @@ const App = () => {
             Check
           </Button>
           <Button 
-            onClick={handleGenerateNewPuzzle}
+            //onClick={handleGenerateNewPuzzle}
             variant="contained"
             sx={{ 
               width: 'fit-content',

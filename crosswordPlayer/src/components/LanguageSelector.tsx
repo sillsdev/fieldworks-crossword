@@ -6,8 +6,6 @@ import { LanguageSelectorProps } from '../types/types';
 const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
     const {
         fetchProjects, 
-        // loading, 
-        // error, 
         generateCrossword,
         fetchVernacularLanguages,
         fetchAnalysisLanguages

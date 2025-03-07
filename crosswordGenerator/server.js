@@ -105,7 +105,7 @@ app.get("/generate-crossword", async (req, res) => {
         const apiResponse = await axios.get(apiUrl);
         // filter words
         const filteredData = apiResponse.data.filter(entry => {
-            return validateWord(entry, languageCode);
+            return validateWord(entry, languageCode, publication);
         });
         let my10Words = chooseRandomWords(filteredData, 10);
         // make chosen words into an object
@@ -160,7 +160,10 @@ function chooseRandomWords(dictionaryWords, numWords) {
 // make sure word does not contain spaces or numbers
 // makes sure it is between 4 and 10 characters long
 // this can be added to if we determine more validation is needed
-function validateWord(entry, languageCode) {
+function validateWord(entry, languageCode, publication) {
+    if (publication && entry.publishIn.id !== publication) {
+        return false;
+    }
     let word = "";
     if (entry.citationForm[languageCode] || entry.lexemeForm[languageCode]) {
         word = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];

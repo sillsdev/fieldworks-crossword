@@ -38,70 +38,36 @@ app.get("/fetch-project-names", async (req, res) => {
 });
 
 app.get("/fetch-vernacular-languages", async (req, res) => {
-    console.log("Fetching data from external API...");
-    const apiUrl = 'http://localhost:49279/api/localProjects';
     if (!req.query.projectName) {
         res.status(400).json({ error: "Missing project name parameter" });
         return;
-    }
+    }  
+    console.log("Fetching data from external API...");
+    const apiUrl = `http://localhost:49279/api/mini-lcm/FwData/${req.query.projectName}/writingSystems`;
     try {
-        const apiResponse = await axios.get(apiUrl);
-        const languages = await Promise.all(apiResponse.data.map(async (element) => {
-            if (element.fwdata === true && element.name === req.query.projectName) {
-                // get language code for each fwdata project
-                const languageInfo = await fetchLanguages(element.name);
-                return languageInfo.vernacularLanguages;
-            }
-            return null;
-        }));
-        res.json(languages.filter(lang => lang !== null));
+        const languageResponse = await axios.get(apiUrl);
+        const vernacularLanguages = languageResponse.data.vernacular.map(vernacularEntry => vernacularEntry.name);
+        res.json(vernacularLanguages);
     } catch (error) {
-        res.status(500).json({ error: "Failed to fetch vernacular languages" });
         console.error("Error fetching vernacular languages:", error.message);
     }
 });
 
 app.get("/fetch-analysis-languages", async (req, res) => {
-    console.log("Fetching data from external API...");
-    const apiUrl = 'http://localhost:49279/api/localProjects';
     if (!req.query.projectName) {
         res.status(400).json({ error: "Missing project name parameter" });
         return;
-    }
+    }  
+    console.log("Fetching data from external API...");
+    const apiUrl = `http://localhost:49279/api/mini-lcm/FwData/${req.query.projectName}/writingSystems`;
     try {
-        const apiResponse = await axios.get(apiUrl);
-        const languages = await Promise.all(apiResponse.data.map(async (element) => {
-            if (element.fwdata === true && element.name === req.query.projectName) {
-                // get language code for each fwdata project
-                const languageInfo = await fetchLanguages(element.name);
-                return languageInfo.analysisLanguages;
-            }
-            return null;
-        }));
-        res.json(languages.filter(lang => lang !== null));
+        const languageResponse = await axios.get(apiUrl);
+        const analysisLanguages = languageResponse.data.analysis.map(analysisEntry => analysisEntry.name);
+        res.json(analysisLanguages);
     } catch (error) {
-        res.status(500).json({ error: "Failed to fetch analysis languages" });
-        console.error("Error fetching analysis languages:", error.message);
+        console.error("Error fetching analysis languages", error.message);
     }
 });
-
-// fetch language code for each project
-async function fetchLanguages(projectName) {
-    const languageUrl = `http://localhost:49279/api/mini-lcm/FwData/${projectName}/writingSystems`;
-    
-    try {
-        const languageResponse = await axios.get(languageUrl);
-        const analysisLanguages = languageResponse.data.analysis.map(analysisEntry => analysisEntry.name);
-        const vernacularLanguages = languageResponse.data.vernacular.map(vernacularEntry => vernacularEntry.name);
-        let response = {
-            vernacularLanguages: vernacularLanguages,
-            analysisLanguages: analysisLanguages
-        }
-        return response;
-    } catch (error) {
-        console.error("Error fetching language data:", error.message);
-    }
-}
 
 app.get("/generate-crossword", async (req, res) => {
     console.log("Generating Crossword...");

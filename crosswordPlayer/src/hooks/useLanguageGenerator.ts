@@ -6,12 +6,12 @@ const useLanguageGenerator = () => {
   const [generatingCrossword, setGeneratingCrossword] = useState<boolean>(false);
   const [crosswordError, setCrosswordError] = useState<string | null>(null);
 
-  const fetchLanguages = useCallback(async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       setError(null); 
       
-      const response = await fetch('http://localhost:3000/fetch-languages', {
+      const response = await fetch('http://localhost:3000/fetch-project-names', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -32,14 +32,7 @@ const useLanguageGenerator = () => {
         throw new Error("Invalid data format received from server");
       }
       
-      const validLanguages = data
-        .filter(item => item !== null)
-        .map(item => ({
-            languageCode: item.languageCode,
-            projectName: item.projectName,
-            analysisLanguage: item.analysisLanguage,
-        }));      
-      return validLanguages;
+      return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch languages');
     } finally {
@@ -47,14 +40,68 @@ const useLanguageGenerator = () => {
     }
   }, []);
 
-  const generateCrossword = useCallback(async (projectName: string, projectCode: string) => {
+  const fetchVernacularLanguages = useCallback(async (projectName: string) => {
+    try {
+      setLoading(true);
+      setError(null); 
+      
+      const response = await fetch(`http://localhost:3000/fetch-vernacular-languages?projectName=${encodeURIComponent(projectName)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        mode: 'cors'
+      });
+
+      const data = await response.json();
+
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch languages');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchAnalysisLanguages = useCallback(async (projectName: string) => {
+    try {
+      setLoading(true);
+      setError(null); 
+      
+      const response = await fetch(`http://localhost:3000/fetch-analysis-languages?projectName=${encodeURIComponent(projectName)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        mode: 'cors'
+      });
+
+      const data = await response.json();
+
+      if (!data || !Array.isArray(data)) {
+        console.error("Invalid data format received:", data);
+        throw new Error("Invalid data format received from server");
+      }
+
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch languages');
+    }
+    finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const generateCrossword = useCallback(async (projectName: string, projectCode: string, analysisLanguage: string) => {
     try {
         setGeneratingCrossword(true);
         setCrosswordError(null);
 
         console.log("Generating crossword");
         const response = await fetch(
-            `http://localhost:3000/generate-crossword?projectName=${encodeURIComponent(projectName)}&languageCode=${encodeURIComponent(projectCode)}`, {
+            `http://localhost:3000/generate-crossword?projectName=${encodeURIComponent(projectName)}&languageCode=${encodeURIComponent(projectCode)}&analysisLanguage=${encodeURIComponent(analysisLanguage)}`, {
             method: 'GET', 
             headers: {
                 'Accept': 'application/json',
@@ -82,10 +129,12 @@ const useLanguageGenerator = () => {
     return { 
         loading, 
         error, 
-        fetchLanguages, 
+        fetchProjects, 
         generatingCrossword, 
         crosswordError, 
-        generateCrossword 
+        generateCrossword,
+        fetchVernacularLanguages,
+        fetchAnalysisLanguages
     };
 };
 

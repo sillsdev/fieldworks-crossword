@@ -16,47 +16,58 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("Server Listening on PORT:", PORT);
 });
-app.get("/fetch-languages", async (req, res) => {
+
+app.get("/fetch-project-names", async (req, res) => {
     console.log("Fetching data from external API...");
     const apiUrl = 'http://localhost:49279/api/localProjects';
     
     try {
         const apiResponse = await axios.get(apiUrl);
-        const languages = await Promise.all(apiResponse.data.map(async (element) => {
+        const projects = await Promise.all(apiResponse.data.map(async (element) => {
             if (element.fwdata === true) {
-                // get language code for each fwdata project
-                const language = await fetchLanguage(element.name);
-                const languageData = {
-                    languageCode: language,
-                    projectName: element.name,
-                    analysisLanguages: language.analysisLanguages
-                }
-                return languageData;
+                // get project name for each fwdata project
+                return element.name;
             }
             return null;
         }));
-        res.json(languages.filter(lang => lang !== null));
+        res.json(projects.filter(lang => lang !== null));
     } catch (error) {
-        console.error("Error fetching languages:", error.message);
+        console.error("Error fetching project names:", error.message);
+        res.status(500).json({ error: "Failed to fetch project names" });
     }
 });
 
-// fetch language code for each project
-async function fetchLanguage(projectName) {
-    const languageUrl = `http://localhost:49279/api/mini-lcm/FwData/${projectName}/writingSystems`;
-    
+app.get("/fetch-vernacular-languages", async (req, res) => {
+    if (!req.query.projectName) {
+        res.status(400).json({ error: "Missing project name parameter" });
+        return;
+    }  
+    console.log("Fetching data from external API...");
+    const apiUrl = `http://localhost:49279/api/mini-lcm/FwData/${req.query.projectName}/writingSystems`;
     try {
-        const languageResponse = await axios.get(languageUrl);
-        const analysisLanguages = languageResponse.data.analysis.map(analysisEntry => analysisEntry.name);
-        let response = {
-            languageName: languageResponse.data.vernacular[0].name,
-            analysisLanguages: analysisLanguages
-        }
-        return response;
+        const languageResponse = await axios.get(apiUrl);
+        const vernacularLanguage = languageResponse.data.vernacular[0].name;
+        res.json(vernacularLanguage);
     } catch (error) {
-        console.error("Error fetching language data:", error.message);
+        console.error("Error fetching vernacular languages:", error.message);
     }
-}
+});
+
+app.get("/fetch-analysis-languages", async (req, res) => {
+    if (!req.query.projectName) {
+        res.status(400).json({ error: "Missing project name parameter" });
+        return;
+    }  
+    console.log("Fetching data from external API...");
+    const apiUrl = `http://localhost:49279/api/mini-lcm/FwData/${req.query.projectName}/writingSystems`;
+    try {
+        const languageResponse = await axios.get(apiUrl);
+        const analysisLanguages = languageResponse.data.analysis.map(analysisEntry => analysisEntry.name);
+        res.json(analysisLanguages);
+    } catch (error) {
+        console.error("Error fetching analysis languages", error.message);
+    }
+});
 
 app.get("/generate-crossword", async (req, res) => {
     console.log("Generating Crossword...");
@@ -74,8 +85,7 @@ app.get("/generate-crossword", async (req, res) => {
         const apiResponse = await axios.get(apiUrl);
         // filter words
         const filteredData = apiResponse.data.filter(entry => {
-            let word = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];
-            return validateWord(word);
+            return validateWord(entry, languageCode);
         });
         let my10Words = chooseRandomWords(filteredData, 10);
         // make chosen words into an object
@@ -83,9 +93,15 @@ app.get("/generate-crossword", async (req, res) => {
             // Define clue for each entry
             let clue = (entry.senses[0].definition.hasOwnProperty(analysisLanguage) ? entry.senses[0].definition[analysisLanguage] : Object.values(entry.senses[0].definition)[0]) 
                 || (entry.senses[0].gloss.hasOwnProperty(analysisLanguage) ? entry.senses[0].gloss[analysisLanguage] : Object.values(entry.senses[0].gloss)[0]);
+            let answer = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];
+            if (answer) {
+               answer = answer.normalize("NFC");
+            } else {
+                answer = Object.values(entry.citationForm)[0] || Object.values(entry.lexemeForm)[0];
+            }
             return {
                 clue: clue,
-                answer: (entry.citationForm[languageCode] || entry.lexemeForm[languageCode]).normalize("NFC")
+                answer: answer
             };
         });
         var layout = generateLayout(input);
@@ -124,7 +140,14 @@ function chooseRandomWords(dictionaryWords, numWords) {
 // make sure word does not contain spaces or numbers
 // makes sure it is between 4 and 10 characters long
 // this can be added to if we determine more validation is needed
-function validateWord(word) {
+function validateWord(entry, languageCode) {
+    let word = "";
+    if (entry.citationForm[languageCode] || entry.lexemeForm[languageCode]) {
+        word = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];
+    }
+    else {
+        word = Object.values(entry.citationForm)[0] || Object.values(entry.lexemeForm)[0];
+    }
     word = word.normalize("NFC");
     return word.length <= 10 && word.length >= 4 && !/[\s\d]/.test(word);
 }

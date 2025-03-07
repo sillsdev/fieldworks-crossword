@@ -76,30 +76,6 @@ app.get("/fetch-analysis-languages", async (req, res) => {
     }
 });
 
-// app.get("/fetch-languages", async (req, res) => {
-//     console.log("Fetching data from external API...");
-//     const apiUrl = 'http://localhost:49279/api/localProjects';
-    
-//     try {
-//         const apiResponse = await axios.get(apiUrl);
-//         const languages = await Promise.all(apiResponse.data.map(async (element) => {
-//             if (element.fwdata === true) {
-//                 // get language code for each fwdata project
-//                 const language = await fetchLanguages(element.name);
-//                 const languageData = {
-//                     languageCode: language,
-//                     projectName: element.name,
-//                     analysisLanguages: language.analysisLanguages
-//                 }
-//                 return languageData;
-//             }
-//             return null;
-//         }));
-//         res.json(languages.filter(lang => lang !== null));
-//     } catch (error) {
-//         console.error("Error fetching languages:", error.message);
-//     }
-// });
 
 // fetch language code for each project
 async function fetchLanguages(projectName) {

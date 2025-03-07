@@ -5,16 +5,15 @@ import { useCrossword } from './hooks/useCrossword';
 import LanguageSelector from './components/LanguageSelector';
 import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
-import useLanguageGenerator from './hooks/useLanguageGenerator';
+import { generateNewCrossword } from './utils/newCrossword';
 
 const App = () => {
   const [crosswordData, setCrosswordData] = useState<any>(null);
   const theme = useTheme();
   const [isLanguageSelectorOpen, setIsLanguageSelectorOpen] = useState<boolean>(true);
-  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
-  const { generateCrossword } = useLanguageGenerator();
-  const [projectName, setProjectName] = useState<string | null>(null);
-  const [analysisLanguage, setAnalysisLanguage] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<string>('');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+  const [selectedAnalysis, setSelectedAnalysis] = useState<string>('');
 
   const { 
     handleCheckClick, 
@@ -40,27 +39,27 @@ const App = () => {
 
   const handleCrosswordGenerated = (data: any) => {
     setCrosswordData(data);
-    handleCloseLanguageSelector();
-    console.log("data", data);
-    // Store all necessary information when a crossword is generated
-    if (data) {
-      setProjectName(data.projectName);
-      
-      if (data.language) {
-        setSelectedLanguage(data.language);
-      }
-      
-      if (data.analysisLanguage) {
-        setAnalysisLanguage(data.analysisLanguage);
-      }
-    }
+    setIsLanguageSelectorOpen(false);
   };
 
-  // const handleGenerateNewPuzzle = async () => {
-  //   return (
-  //     <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
-  //   )
-  // };
+  const handleGenerateNewPuzzle = async () => {
+    if (selectedProject && selectedLanguage && selectedAnalysis) {
+      try {
+        const newCrosswordData = await generateNewCrossword(
+          selectedProject,
+          selectedLanguage,
+          selectedAnalysis
+        );
+        if (newCrosswordData) {
+          setCrosswordData(newCrosswordData);
+        }
+      } catch (err) {
+        console.error("Error generating new crossword:", err);
+      }
+    } else {
+      handleOpenLanguageSelector();
+    }
+  };
 
   return (
     <Container 
@@ -89,7 +88,15 @@ const App = () => {
         <DialogTitle>Select Language</DialogTitle>
         <DialogContent>
           <Box sx={{ py: 2 }}>
-            <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
+            <LanguageSelector 
+              onCrosswordGenerated={handleCrosswordGenerated} 
+              selectedProject={selectedProject}
+              selectedLanguage={selectedLanguage}
+              selectedAnalysis={selectedAnalysis}
+              setSelectedProject={setSelectedProject}
+              setSelectedLanguage={setSelectedLanguage}
+              setSelectedAnalysis={setSelectedAnalysis}
+            />          
           </Box>
         </DialogContent>
         <DialogActions>
@@ -194,7 +201,7 @@ const App = () => {
             Check
           </Button>
           <Button 
-            //onClick={handleGenerateNewPuzzle}
+            onClick={handleGenerateNewPuzzle}
             variant="contained"
             sx={{ 
               width: 'fit-content',

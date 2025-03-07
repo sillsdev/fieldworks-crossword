@@ -3,7 +3,15 @@ import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } fro
 import useLanguageGenerator from '../hooks/useLanguageGenerator';
 import { LanguageSelectorProps } from '../types/types';
 
-const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
+const LanguageSelector = ({ 
+    onCrosswordGenerated,
+    selectedProject,
+    selectedLanguage,
+    selectedAnalysis,
+    setSelectedProject,
+    setSelectedLanguage,
+    setSelectedAnalysis
+ }: LanguageSelectorProps) => {
     const {
         fetchProjects, 
         generateCrossword,
@@ -11,9 +19,6 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
         fetchAnalysisLanguages
      } = useLanguageGenerator(); 
     const [projects, setProjects] = useState<string[]>([]);
-    const [selectedProject, setSelectedProject] = useState<string>('');
-    const [selectedLanguage, setSelectedLanguage] = useState<string>('');
-    const [selectedAnalysis, setSelectedAnalysis] = useState<string>('');
     const [menuLanguages, setMenuLanguages] = useState<string[]>([]);
     const [analysisLanguages, setAnalysisLanguages] = useState<string[]>([]);
 
@@ -34,12 +39,11 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
 
     const handleProjectChange = async (event: SelectChangeEvent) => {
         const value = event.target.value;
-        const selected = projects.find(project => project === value);
-        if (selected) {
+        if (value) {
             setSelectedProject(value);
             setSelectedLanguage('');
             try {
-                const languages = await fetchVernacularLanguages(selected);
+                const languages = await fetchVernacularLanguages(value);
                 if (languages) {
                     const languageCodes = languages.flat().filter(Boolean);
                     setMenuLanguages(languageCodes);

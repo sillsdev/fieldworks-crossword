@@ -45,7 +45,6 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
             }
 
             crosswordData.result.forEach(wordData => {
-                console.log(wordData);
                 const { answer, startx, starty, position, orientation, clue } = wordData;
                 const clueObject = { number: position, clue };
 
@@ -63,6 +62,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
 
                 const x = startx - 1;
                 const y = starty - 1;
+
                 const wordId = `${orientation}-${position}`;
 
                 const word: Word = {
@@ -123,6 +123,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
             })
             setWords(wordsList);
             setGrid(newGrid);
+            setCorrectWords([]); // Reset correct words
         }
     }, [crosswordData]);
 
@@ -250,6 +251,6 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         formattedClues,
         activeCell,
         activeDirection,
-        correctWords // Add correctWords to the return object
+        correctWords 
     };
 }

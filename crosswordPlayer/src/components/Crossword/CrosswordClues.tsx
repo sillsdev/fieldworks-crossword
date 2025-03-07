@@ -25,8 +25,7 @@ const Clue = ({
         textDecoration: isCorrect ? 'line-through' : 'none', 
         backgroundColor: isCorrect ? '#c8e6c9' : 'inherit', 
         color: isCorrect ? '#004400' : 'inherit', 
-        borderRadius: '4px', // Add border radius
-        cursor: 'pointer', // Add cursor pointer
+        cursor: 'pointer',
         '&:hover': {
           backgroundColor: isActive ? '#e3f2fd' : '#f0f0f0', 
         },

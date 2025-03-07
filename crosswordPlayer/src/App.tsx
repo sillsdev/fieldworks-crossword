@@ -27,7 +27,8 @@ const App = () => {
     handleInput,
     activeCell,
     activeDirection, 
-    correctWords
+    correctWords,
+    handleShowAnswers // Add this line
   } = useCrossword(crosswordData);
 
   const handleOpenLanguageSelector = () => {
@@ -200,6 +201,18 @@ const App = () => {
             }}
           >
             Check
+          </Button>
+          <Button 
+            onClick={handleShowAnswers}
+            variant="contained"
+            color="secondary"
+            sx={{ 
+              width: 'fit-content',
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1, sm: 1.5 },
+            }}
+          >
+            Answers
           </Button>
           <Button 
             onClick={handleGenerateNewPuzzle}

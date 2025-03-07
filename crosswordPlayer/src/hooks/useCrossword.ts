@@ -198,6 +198,31 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         return result;
     }, [grid, words]);
 
+    const handleShowAnswers = useCallback(() => {
+        const newGrid = [...grid];
+        const newCorrectWords: string[] = [];
+
+        words.forEach(word => {
+            // Add this word to correct words list
+            newCorrectWords.push(word.id);
+            
+            // Fill in each cell with the correct letter
+            word.cells.forEach(({ row, col }, index) => {
+                if (row < newGrid.length && col < newGrid[0].length) {
+                    newGrid[row][col] = {
+                        ...newGrid[row][col],
+                        value: word.answer[index],
+                        isCorrect: true,
+                        isIncorrect: false
+                    };
+                }
+            });
+        });
+        
+        setGrid(newGrid);
+        setCorrectWords(newCorrectWords);
+    }, [grid, words]);
+
     const isActiveCell = (rowIndex: number, colIndex: number): boolean => {
         if (!activeCell) return false;
         if (activeCell.col === colIndex && activeCell.row === rowIndex) {
@@ -220,6 +245,41 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
             setActiveCell({ row, col: col - 1 });
         } else if (key === 'ArrowRight' && col < grid[0].length - 1) {
             setActiveCell({ row, col: col + 1 });
+        } else if (key === 'Backspace') {
+            // Clear the current cell
+            const newGrid = [...grid];
+            newGrid[row][col].value = '';
+            setGrid(newGrid);
+            
+            // Move to previous cell if in the middle of a word
+            if (activeDirection === 'across' && col > 0) {
+                // For across words, move left if possible
+                let newCol = col - 1;
+                // Skip blocked cells
+                while (newCol >= 0 && newGrid[row][newCol].isBlocked) {
+                    newCol--;
+                }
+                // Only move if we found a non-blocked cell
+                if (newCol >= 0) {
+                    setActiveCell({ row, col: newCol });
+                }
+            } else if (activeDirection === 'down' && row > 0) {
+                // For down words, move up if possible
+                let newRow = row - 1;
+                // Skip blocked cells
+                while (newRow >= 0 && newGrid[newRow][col].isBlocked) {
+                    newRow--;
+                }
+                // Only move if we found a non-blocked cell
+                if (newRow >= 0) {
+                    setActiveCell({ row: newRow, col });
+                }
+            }
+        } else if (key === 'Delete') {
+            // Just clear the current cell without moving
+            const newGrid = [...grid];
+            newGrid[row][col].value = '';
+            setGrid(newGrid);
         } else if (key.length === 1) {
             const newGrid = [...grid];
             newGrid[row][col].value = key.toUpperCase();
@@ -243,15 +303,50 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         
         const { row, col } = activeCell;
         const newGrid = [...grid];
+        
+        // Handle special characters
+        if (character === 'Backspace' || character === '\b') {
+            newGrid[row][col].value = '';
+            setGrid(newGrid);
+            
+            // Same backspace navigation logic as in handleKeyDown
+            if (activeDirection === 'across' && col > 0) {
+                let newCol = col - 1;
+                while (newCol >= 0 && newGrid[row][newCol].isBlocked) {
+                    newCol--;
+                }
+                if (newCol >= 0) {
+                    setActiveCell({ row, col: newCol });
+                }
+            } else if (activeDirection === 'down' && row > 0) {
+                let newRow = row - 1;
+                while (newRow >= 0 && newGrid[newRow][col].isBlocked) {
+                    newRow--;
+                }
+                if (newRow >= 0) {
+                    setActiveCell({ row: newRow, col });
+                }
+            }
+            return;
+        }
+        
+        if (character === 'Delete') {
+            newGrid[row][col].value = '';
+            setGrid(newGrid);
+            return;
+        }
+        
+        // Regular character input (unchanged)
         newGrid[row][col].value = character.toUpperCase();
         setGrid(newGrid);
-    }, [activeCell, grid]);
+    }, [activeCell, grid, activeDirection]);
 
     return {
         grid,
         isActiveCell, 
         words,
         handleCheckClick,
+        handleShowAnswers, // Add this line
         handleClueClick,
         activeClue,
         handleKeyDown,

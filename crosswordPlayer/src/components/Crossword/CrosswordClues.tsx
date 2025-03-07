@@ -54,9 +54,6 @@ const CrosswordClues: React.FC<CrosswordCluesProps> = ({
       maxWidth: 300,
       marginLeft: theme.spacing(2),
     })}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Clues</Typography>
-      </Box>
 
       <Box>
         <Typography variant="subtitle1" gutterBottom fontWeight="bold">Across</Typography>

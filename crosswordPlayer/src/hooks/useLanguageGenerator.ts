@@ -99,14 +99,14 @@ const useLanguageGenerator = () => {
     }
   }, []);
 
-  const generateCrossword = useCallback(async (projectName: string, projectCode: string) => {
+  const generateCrossword = useCallback(async (projectName: string, projectCode: string, analysisLanguage: string) => {
     try {
         setGeneratingCrossword(true);
         setCrosswordError(null);
 
         console.log("Generating crossword");
         const response = await fetch(
-            `http://localhost:3000/generate-crossword?projectName=${encodeURIComponent(projectName)}&languageCode=${encodeURIComponent(projectCode)}`, {
+            `http://localhost:3000/generate-crossword?projectName=${encodeURIComponent(projectName)}&languageCode=${encodeURIComponent(projectCode)}&analysisLanguage=${encodeURIComponent(analysisLanguage)}`, {
             method: 'GET', 
             headers: {
                 'Accept': 'application/json',

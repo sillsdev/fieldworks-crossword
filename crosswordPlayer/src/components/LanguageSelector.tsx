@@ -64,13 +64,6 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
                 const languages = analysisLanguages.flat().filter(Boolean);
                 setAnalysisLanguages(languages);
             }
-            // const crosswordData = await generateCrossword(
-            //     selectedProject, 
-            //     value, 
-            // );
-            // if (crosswordData) {
-            //     onCrosswordGenerated(crosswordData);
-            // }
           } catch (err) {
             console.error("Error generating crossword:", err);
           }
@@ -86,6 +79,7 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
                 const crosswordData = await generateCrossword(
                     selectedProject, 
                     selectedLanguage, 
+                    value
                 );
             if (crosswordData) {
                 onCrosswordGenerated(crosswordData);

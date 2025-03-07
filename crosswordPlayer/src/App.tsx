@@ -1,4 +1,4 @@
-import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Backdrop } from '@mui/material';
+import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import CrosswordBoard from './components/Crossword/CrosswordBoard';
 import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
@@ -19,9 +19,9 @@ const App = () => {
     handleClick, 
     isActiveCell,
     formattedClues,
-    activeCell, // Add this state
-    activeDirection, // Add this state
-    correctWords // Add this state
+    activeCell, 
+    activeDirection, 
+    correctWords 
   } = useCrossword(crosswordData);
 
   const handleOpenModal = () => {
@@ -34,7 +34,7 @@ const App = () => {
 
   const handleCrosswordGenerated = (data: any) => {
     setCrosswordData(data);
-    handleCloseModal(); // Close the modal after generating the crossword
+    handleCloseModal(); 
   };
 
   return (
@@ -48,20 +48,14 @@ const App = () => {
         alignItems: 'center',
         px: { xs: 2, sm: 4 },
         py: 2,
-        pt: 4,
+        pt: 16,
       }}
     >
-      {/* Modal/Dialog for language selection */}
       <Dialog 
         open={isModalOpen} 
         onClose={handleCloseModal}
         fullWidth
         maxWidth="sm"
-        BackdropProps={{
-          style: {
-            backgroundColor: `${theme.palette.grey[900]}`,
-          },
-        }}
       >
         <DialogTitle>Generate New Puzzle</DialogTitle>
         <DialogContent>
@@ -76,7 +70,7 @@ const App = () => {
 
       <Box sx={{ 
         width: '100%',
-        maxWidth: 900,
+        //maxWidth: 900,
         textAlign: 'center',
         padding: { xs: 2, sm: 4 },
         borderRadius: 2,
@@ -129,9 +123,7 @@ const App = () => {
               overflowY: 'auto',
               textAlign: 'left',
               mt: { xs: 3, md: 0 },
-              // Ensure the height matches the board on md screens and above
               alignSelf: { md: 'stretch' },
-              // Add scrollbar styling
               '&::-webkit-scrollbar': {
                 width: '8px',
                 height: '8px',
@@ -143,7 +135,6 @@ const App = () => {
               '&::-webkit-scrollbar-track': {
                 backgroundColor: 'rgba(0,0,0,0.05)',
               },
-              // Ensure scrolling behavior is smooth
               scrollBehavior: 'smooth',
             }}
           >
@@ -151,7 +142,7 @@ const App = () => {
               clues={formattedClues}
               onClueClick={handleClueClick}
               activeClue={activeClue}
-              correctWords={correctWords} // Pass correct words
+              correctWords={correctWords}
             />
           </Box>
         </Box>

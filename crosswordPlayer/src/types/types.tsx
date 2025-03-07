@@ -32,6 +32,7 @@ export interface CrosswordCluesProps {
     };
     onClueClick?: (type: 'across' | 'down', number: number) => void;
     activeClue?: { type: 'across' | 'down'; number: number } | null;
+    correctWords: string[];
 }
 
 export interface UseClueInteractionProps {

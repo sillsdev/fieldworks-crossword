@@ -257,65 +257,36 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         return false;
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-        if (!activeCell) return;
+    function handleKeyDown(event: KeyboardEvent) {
+        const { key } = event;
+        let { row, col } = activeCell;
     
-        const { row, col } = activeCell;
-        const key = event.key;
-    
-        if (key === 'ArrowUp' && row > 0) {
-            setActiveCell({ row: row - 1, col });
-        } else if (key === 'ArrowDown' && row < grid.length - 1) {
-            setActiveCell({ row: row + 1, col });
-        } else if (key === 'ArrowLeft' && col > 0) {
-            setActiveCell({ row, col: col - 1 });
-        } else if (key === 'ArrowRight' && col < grid[0].length - 1) {
-            setActiveCell({ row, col: col + 1 });
-        } else if (key === 'Backspace') {
-            // Clear the current cell
-            const newGrid = [...grid];
-            newGrid[row][col].value = '';
-            setGrid(newGrid);
-            
-            // Move to previous cell if in the middle of a word
-            if (activeDirection === 'across' && col > 0) {
-                // For across words, move left if possible
-                let newCol = col - 1;
-                // Skip blocked cells
-                while (newCol >= 0 && newGrid[row][newCol].isBlocked) {
-                    newCol--;
-                }
-                // Only move if we found a non-blocked cell
-                if (newCol >= 0) {
-                    setActiveCell({ row, col: newCol });
-                }
-            } else if (activeDirection === 'down' && row > 0) {
-                // For down words, move up if possible
-                let newRow = row - 1;
-                // Skip blocked cells
-                while (newRow >= 0 && newGrid[newRow][col].isBlocked) {
-                    newRow--;
-                }
-                // Only move if we found a non-blocked cell
-                if (newRow >= 0) {
-                    setActiveCell({ row: newRow, col });
-                }
-            }
-        } else if (key === 'Delete') {
-            // Just clear the current cell without moving
-            const newGrid = [...grid];
-            newGrid[row][col].value = '';
-            setGrid(newGrid);
-        } else if (key.length === 1) {
-            const newGrid = [...grid];
-            newGrid[row][col].value = key.toUpperCase();
-            setGrid(newGrid);
+        if (key === 'ArrowUp' && row > 0 && !grid[row - 1][col].isBlocked) {
+            row -= 1;
+            setActiveDirection('down');
+        } else if (key === 'ArrowDown' && row < grid.length - 1 && !grid[row + 1][col].isBlocked) {
+            row += 1;
+            setActiveDirection('down');
+        } else if (key === 'ArrowLeft' && col > 0 && !grid[row][col - 1].isBlocked) {
+            col -= 1;
+            setActiveDirection('across');
+        } else if (key === 'ArrowRight' && col < grid[0].length - 1 && !grid[row][col + 1].isBlocked) {
+            col += 1;
+            setActiveDirection('across');
+        } else if (key.length === 1 || key === 'Backspace' || key === 'Delete') {
+            handleInput(key);
         }
-        
-    };       
-
-    const handleClick = (row: number, col: number) => {
+    
         setActiveCell({ row, col });
+    }
+
+    function handleClick(row: number, col: number) {
+        // Toggle direction if the same cell is clicked again
+        if (activeCell?.row === row && activeCell?.col === col) {
+            setActiveDirection(activeDirection === 'across' ? 'down' : 'across');
+        } else {
+            setActiveCell({ row, col });
+        }
     };
 
     useEffect(() => {
@@ -333,32 +304,14 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         
         // Handle special characters
         if (character === 'Backspace' || character === '\b') {
-            newGrid[row][col].value = '';
-            setGrid(newGrid);
-            
-            // Same backspace navigation logic as in handleKeyDown
-            if (activeDirection === 'across' && col > 0) {
-                let newCol = col - 1;
-                while (newCol >= 0 && newGrid[row][newCol].isBlocked) {
-                    newCol--;
-                }
-                if (newCol >= 0) {
-                    setActiveCell({ row, col: newCol });
-                }
-            } else if (activeDirection === 'down' && row > 0) {
-                let newRow = row - 1;
-                while (newRow >= 0 && newGrid[newRow][col].isBlocked) {
-                    newRow--;
-                }
-                if (newRow >= 0) {
-                    setActiveCell({ row: newRow, col });
-                }
-            }
+            handleBackspace();
             return;
         }
         
         if (character === 'Delete') {
             newGrid[row][col].value = '';
+            newGrid[row][col].isCorrect = false;
+            newGrid[row][col].isIncorrect = false;
             setGrid(newGrid);
             return;
         }
@@ -374,8 +327,88 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         
         // Regular character input
         newGrid[row][col].value = character.toUpperCase();
+        newGrid[row][col].isCorrect = false;
+        newGrid[row][col].isIncorrect = false;
         setGrid(newGrid);
+
+        // Move to the next cell
+        handleTyping(character);
     }, [activeCell, grid, activeDirection]);
+
+    function handleTyping(character: string) {
+        let { row, col } = activeCell;
+
+        if (activeDirection === 'across' && col < grid[0].length - 1 && !grid[row][col + 1].isBlocked) {
+            col += 1;
+        } else if (activeDirection === 'down' && row < grid.length - 1 && !grid[row + 1][col].isBlocked) {
+            row += 1;
+        }
+
+        setActiveCell({ row, col });
+    }
+
+    function handleBackspace() {
+        let { row, col } = activeCell;
+
+        // Clear the current cell value
+        const newGrid = [...grid];
+        newGrid[row][col].value = '';
+        newGrid[row][col].isCorrect = false;
+        newGrid[row][col].isIncorrect = false;
+        setGrid(newGrid);
+
+        // Move the active cell
+        if (activeDirection === 'across' && col > 0 && !grid[row][col - 1].isBlocked) {
+            col -= 1;
+        } else if (activeDirection === 'down' && row > 0 && !grid[row - 1][col].isBlocked) {
+            row -= 1;
+        }
+
+        setActiveCell({ row, col });
+
+        // Revalidate the words
+        revalidateWords(newGrid);
+    }
+
+    function revalidateWords(newGrid: CellData[][]) {
+        const newCorrectWords: string[] = [];
+
+        words.forEach(word => {
+            let userWord = '';
+            let isComplete = true;
+
+            word.cells.forEach(({ row, col }) => {
+                if (row < newGrid.length && col < newGrid[0].length) {
+                    const cellVal = newGrid[row][col].value;
+                    if (!cellVal) {
+                        isComplete = false;
+                    }
+                    userWord += cellVal;
+                }
+            });
+
+            if (isComplete) {
+                const isCorrect = userWord.toUpperCase() === word.answer;
+                if (isCorrect) {
+                    newCorrectWords.push(word.id);
+                }
+            }
+        });
+
+        words.forEach(word => {
+            if (!newCorrectWords.includes(word.id)) {
+                word.cells.forEach(({ row, col }) => {
+                    if (row < newGrid.length && col < newGrid[0].length) {
+                        newGrid[row][col].isCorrect = false;
+                        newGrid[row][col].isIncorrect = false;
+                    }
+                });
+            }
+        });
+
+        setGrid(newGrid);
+        setCorrectWords(newCorrectWords);
+    }
 
     return {
         grid,
@@ -391,6 +424,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         activeCell,
         activeDirection,
         correctWords ,
-        handleInput
+        handleInput,
+        handleTyping
     };
 }

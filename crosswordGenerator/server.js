@@ -76,31 +76,6 @@ app.get("/fetch-analysis-languages", async (req, res) => {
     }
 });
 
-// app.get("/fetch-languages", async (req, res) => {
-//     console.log("Fetching data from external API...");
-//     const apiUrl = 'http://localhost:49279/api/localProjects';
-    
-//     try {
-//         const apiResponse = await axios.get(apiUrl);
-//         const languages = await Promise.all(apiResponse.data.map(async (element) => {
-//             if (element.fwdata === true) {
-//                 // get language code for each fwdata project
-//                 const language = await fetchLanguages(element.name);
-//                 const languageData = {
-//                     languageCode: language,
-//                     projectName: element.name,
-//                     analysisLanguages: language.analysisLanguages
-//                 }
-//                 return languageData;
-//             }
-//             return null;
-//         }));
-//         res.json(languages.filter(lang => lang !== null));
-//     } catch (error) {
-//         console.error("Error fetching languages:", error.message);
-//     }
-// });
-
 // fetch language code for each project
 async function fetchLanguages(projectName) {
     const languageUrl = `http://localhost:49279/api/mini-lcm/FwData/${projectName}/writingSystems`;
@@ -119,9 +94,29 @@ async function fetchLanguages(projectName) {
     }
 }
 
+app.get("/fetch-publications", async (req, res) => {
+    console.log("Fetching data from external API...");
+    const { projectName } = req.query;
+    const apiUrl = `http://localhost:49279/api/mini-lcm/FwData/${projectName}/publications`;
+    
+    try {
+        const apiResponse = await axios.get(apiUrl);
+        const vernacularLanguages = apiResponse.data.map(vernacularEntry => {
+            return {
+                publicationName: Object.values(vernacularEntry.name)[0],
+                publicationID: vernacularEntry.id
+            }
+        });
+        res.json(vernacularLanguages.filter(lang => lang !== null));
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch publications" });
+        console.error("Error fetching publications:", error.message);
+    }
+});
+
 app.get("/generate-crossword", async (req, res) => {
     console.log("Generating Crossword...");
-    const { projectName, languageCode, analysisLanguage } = req.query;
+    const { projectName, languageCode, analysisLanguage, publication } = req.query;
     // IF projectname or languageCode is not present throw an error
     if (!projectName || !languageCode) {
         return res.status(400).json({
@@ -135,8 +130,7 @@ app.get("/generate-crossword", async (req, res) => {
         const apiResponse = await axios.get(apiUrl);
         // filter words
         const filteredData = apiResponse.data.filter(entry => {
-            let word = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];
-            return validateWord(word);
+            return validateWord(entry, publication, languageCode);
         });
         let my10Words = chooseRandomWords(filteredData, 10);
         // make chosen words into an object
@@ -185,7 +179,12 @@ function chooseRandomWords(dictionaryWords, numWords) {
 // make sure word does not contain spaces or numbers
 // makes sure it is between 4 and 10 characters long
 // this can be added to if we determine more validation is needed
-function validateWord(word) {
+function validateWord(entry, publication, languageCode) {
+    // make sure word is part of correct publication
+    if (publication && entry.publishIn[0].id !== publication) {
+        return false;
+    }
+    let word = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];
     word = word.normalize("NFC");
     return word.length <= 10 && word.length >= 4 && !/[\s\d]/.test(word);
 }

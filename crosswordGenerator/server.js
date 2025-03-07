@@ -161,7 +161,7 @@ function chooseRandomWords(dictionaryWords, numWords) {
 // makes sure it is between 4 and 10 characters long
 // this can be added to if we determine more validation is needed
 function validateWord(entry, languageCode, publication) {
-    if (publication && entry.publishIn.id !== publication) {
+    if (publication && entry.publishIn[0].id !== publication) {
         return false;
     }
     let word = "";

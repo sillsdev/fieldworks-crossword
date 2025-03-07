@@ -16,7 +16,27 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("Server Listening on PORT:", PORT);
 });
-app.get("/fetch-languages", async (req, res) => {
+
+app.get("/fetch-project-names", async (req, res) => {
+    console.log("Fetching data from external API...");
+    const apiUrl = 'http://localhost:49279/api/localProjects';
+    
+    try {
+        const apiResponse = await axios.get(apiUrl);
+        const projects = await Promise.all(apiResponse.data.map(async (element) => {
+            if (element.fwdata === true) {
+                // get project name for each fwdata project
+                return element.name;
+            }
+            return null;
+        }));
+        res.json(projects.filter(lang => lang !== null));
+    } catch (error) {
+        console.error("Error fetching languages:", error.message);
+    }
+});
+
+app.get("/fetch-vernacular-languages", async (req, res) => {
     console.log("Fetching data from external API...");
     const apiUrl = 'http://localhost:49279/api/localProjects';
     
@@ -25,13 +45,8 @@ app.get("/fetch-languages", async (req, res) => {
         const languages = await Promise.all(apiResponse.data.map(async (element) => {
             if (element.fwdata === true) {
                 // get language code for each fwdata project
-                const language = await fetchLanguage(element.name);
-                const languageData = {
-                    languageCode: language,
-                    projectName: element.name,
-                    analysisLanguages: language.analysisLanguages
-                }
-                return languageData;
+                const languageInfo = await fetchLanguages(element.name);
+                return languageInfo.vernacularLanguages;
             }
             return null;
         }));
@@ -41,15 +56,61 @@ app.get("/fetch-languages", async (req, res) => {
     }
 });
 
+app.get("/fetch-analysis-languages", async (req, res) => {
+    console.log("Fetching data from external API...");
+    const apiUrl = 'http://localhost:49279/api/localProjects';
+    
+    try {
+        const apiResponse = await axios.get(apiUrl);
+        const languages = await Promise.all(apiResponse.data.map(async (element) => {
+            if (element.fwdata === true) {
+                // get language code for each fwdata project
+                const languageInfo = await fetchLanguages(element.name);
+                return languageInfo.analysisLanguages;
+            }
+            return null;
+        }));
+        res.json(languages.filter(lang => lang !== null));
+    } catch (error) {
+        console.error("Error fetching languages:", error.message);
+    }
+});
+
+// app.get("/fetch-languages", async (req, res) => {
+//     console.log("Fetching data from external API...");
+//     const apiUrl = 'http://localhost:49279/api/localProjects';
+    
+//     try {
+//         const apiResponse = await axios.get(apiUrl);
+//         const languages = await Promise.all(apiResponse.data.map(async (element) => {
+//             if (element.fwdata === true) {
+//                 // get language code for each fwdata project
+//                 const language = await fetchLanguages(element.name);
+//                 const languageData = {
+//                     languageCode: language,
+//                     projectName: element.name,
+//                     analysisLanguages: language.analysisLanguages
+//                 }
+//                 return languageData;
+//             }
+//             return null;
+//         }));
+//         res.json(languages.filter(lang => lang !== null));
+//     } catch (error) {
+//         console.error("Error fetching languages:", error.message);
+//     }
+// });
+
 // fetch language code for each project
-async function fetchLanguage(projectName) {
+async function fetchLanguages(projectName) {
     const languageUrl = `http://localhost:49279/api/mini-lcm/FwData/${projectName}/writingSystems`;
     
     try {
         const languageResponse = await axios.get(languageUrl);
         const analysisLanguages = languageResponse.data.analysis.map(analysisEntry => analysisEntry.name);
+        const vernacularLanguages = languageResponse.data.vernacular.map(vernacularEntry => vernacularEntry.name);
         let response = {
-            languageName: languageResponse.data.vernacular[0].name,
+            vernacularLanguages: vernacularLanguages,
             analysisLanguages: analysisLanguages
         }
         return response;

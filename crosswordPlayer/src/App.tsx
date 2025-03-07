@@ -1,4 +1,4 @@
-import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Backdrop } from '@mui/material';
 import CrosswordBoard from './components/Crossword/CrosswordBoard';
 import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
@@ -9,7 +9,7 @@ import { useTheme } from '@mui/material/styles';
 const App = () => {
   const [crosswordData, setCrosswordData] = useState<any>(null);
   const theme = useTheme();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(true); // Set initial state to true
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(true); 
 
   const { 
     handleCheckClick, 
@@ -19,9 +19,9 @@ const App = () => {
     handleClick, 
     isActiveCell,
     formattedClues,
-    activeCell, 
+    activeCell,
     activeDirection, 
-    correctWords 
+    correctWords
   } = useCrossword(crosswordData);
 
   const handleOpenModal = () => {
@@ -56,6 +56,11 @@ const App = () => {
         onClose={handleCloseModal}
         fullWidth
         maxWidth="sm"
+        BackdropProps={{
+          style: {
+            backgroundColor: `${theme.palette.grey[900]}`,
+          },
+        }}
       >
         <DialogTitle>Generate New Puzzle</DialogTitle>
         <DialogContent>
@@ -70,7 +75,6 @@ const App = () => {
 
       <Box sx={{ 
         width: '100%',
-        //maxWidth: 900,
         textAlign: 'center',
         padding: { xs: 2, sm: 4 },
         borderRadius: 2,
@@ -118,7 +122,6 @@ const App = () => {
             sx={{ 
               width: { xs: '100%', md: '40%' }, 
               height: { md: 'auto' },
-              maxHeight: '100vh', // Add this line
               display: 'flex',
               flexDirection: 'column',
               overflowY: 'auto',
@@ -143,7 +146,7 @@ const App = () => {
               clues={formattedClues}
               onClueClick={handleClueClick}
               activeClue={activeClue}
-              correctWords={correctWords}
+              correctWords={correctWords} 
             />
           </Box>
         </Box>

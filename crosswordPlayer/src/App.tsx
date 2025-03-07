@@ -1,15 +1,19 @@
-import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Backdrop } from '@mui/material';
+import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import CrosswordBoard from './components/Crossword/CrosswordBoard';
 import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
 import LanguageSelector from './components/LanguageSelector';
 import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
+import useLanguageGenerator from './hooks/useLanguageGenerator';
 
 const App = () => {
   const [crosswordData, setCrosswordData] = useState<any>(null);
   const theme = useTheme();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(true); 
+  const [isLanguageSelectorOpen, setIsLanguageSelectorOpen] = useState<boolean>(true);
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const { generateCrossword } = useLanguageGenerator();
+  const [projectName, setProjectName] = useState<string | null>(null);
 
   const { 
     handleCheckClick, 
@@ -25,17 +29,40 @@ const App = () => {
     correctWords
   } = useCrossword(crosswordData);
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
+  const handleOpenLanguageSelector = () => {
+    setIsLanguageSelectorOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseLanguageSelector = () => {
+    setIsLanguageSelectorOpen(false);
   };
 
   const handleCrosswordGenerated = (data: any) => {
     setCrosswordData(data);
-    handleCloseModal(); 
+    handleCloseLanguageSelector();
+    console.log("data", data);
+    // Store the selected language when a crossword is generated
+    if (data) {
+      //setSelectedLanguage(data.languageCode.languageName);
+      setProjectName(data.projectName);
+    }
+  };
+
+  const handleGenerateNewPuzzle = async () => {
+    console.log("projectName", projectName);
+    console.log("selectedLanguage", selectedLanguage);
+    if (projectName && selectedLanguage) {
+      try {
+        const newCrosswordData = await generateCrossword(projectName, selectedLanguage);
+        if (newCrosswordData) {
+          handleCrosswordGenerated(newCrosswordData);
+        }
+      } catch (err) {
+        console.error('Error generating new puzzle:', err);   
+      }
+    } else {
+      handleOpenLanguageSelector();
+    }
   };
 
   return (
@@ -52,8 +79,8 @@ const App = () => {
       }}
     >
       <Dialog 
-        open={isModalOpen} 
-        onClose={handleCloseModal}
+        open={isLanguageSelectorOpen} 
+        onClose={handleCloseLanguageSelector}
         fullWidth
         maxWidth="sm"
         BackdropProps={{
@@ -62,14 +89,14 @@ const App = () => {
           },
         }}
       >
-        <DialogTitle>Generate New Puzzle</DialogTitle>
+        <DialogTitle>Select Language</DialogTitle>
         <DialogContent>
           <Box sx={{ py: 2 }}>
             <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal}>Cancel</Button>
+          <Button onClick={handleCloseLanguageSelector}>Cancel</Button>
         </DialogActions>
       </Dialog>
 
@@ -114,7 +141,7 @@ const App = () => {
               grid={grid}
               handleClick={handleClick}
               isActiveCell={isActiveCell}
-            handleInput={handleInput}
+              handleInput={handleInput}
               activeCell={activeCell} 
               activeDirection={activeDirection} 
             />
@@ -170,7 +197,7 @@ const App = () => {
             Check
           </Button>
           <Button 
-            onClick={handleOpenModal}
+            onClick={handleGenerateNewPuzzle}
             variant="contained"
             sx={{ 
               width: 'fit-content',
@@ -179,6 +206,17 @@ const App = () => {
             }}
           >
             Generate New Puzzle
+          </Button>
+          <Button 
+            onClick={handleOpenLanguageSelector}
+            variant="contained"
+            sx={{ 
+              width: 'fit-content',
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1, sm: 1.5 },
+            }}
+          >
+            Language Selector
           </Button>
         </Box>
       </Box>

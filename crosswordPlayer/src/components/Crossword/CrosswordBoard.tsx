@@ -3,7 +3,10 @@ import CrosswordCell from './CrosswordCell';
 import { useEffect, useState, useRef, useMemo } from 'react';
 
 const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
-    const [cellSize, setCellSize] = useState(40); 
+    const MIN_CELL_SIZE = 30; // Minimum usable cell size
+    const MAX_CELL_SIZE = 50; // Maximum cell size for readability
+    
+    const [cellSize, setCellSize] = useState(MIN_CELL_SIZE); 
     const containerRef = useRef<HTMLDivElement>(null);
     const [showCorrectFeedback, setShowCorrectFeedback] = useState(false);
     const [showIncorrectFeedback, setShowIncorrectFeedback] = useState(false);
@@ -18,21 +21,27 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
     }, [grid?.length, grid?.[0]?.length]);
     
     useEffect(() => {
-        if (!grid || grid.length === 0 || !containerRef.current) return;
+        if (!grid || grid.length === 0) return;
         
         const calculateCellSize = () => {
-            const containerWidth = containerRef.current?.clientWidth || 500;
-            const containerHeight = containerRef.current?.clientHeight || 500;
+            if (!containerRef.current) return MIN_CELL_SIZE;
+            
+            // Get parent container width (the outer Box)
+            const parentWidth = containerRef.current.parentElement?.clientWidth || 500;
+            const parentHeight = containerRef.current.parentElement?.clientHeight || 500;
             
             const numRows = grid.length;
             const numCols = grid[0].length;
             
-            const maxCellWidth = containerWidth / numCols;
-            const maxCellHeight = containerHeight / numRows; 
+            // Calculate how big each cell can be based on parent dimensions
+            const maxCellWidth = parentWidth / numCols;
+            const maxCellHeight = parentHeight / numRows; 
             
+            // Use the smaller dimension to ensure cells are square
             const newSize = Math.min(Math.floor(maxCellWidth), Math.floor(maxCellHeight));
             
-            return Math.max(30, newSize);
+            // Keep size within reasonable bounds
+            return Math.min(MAX_CELL_SIZE, Math.max(MIN_CELL_SIZE, newSize));
         };
         
         setCellSize(calculateCellSize());
@@ -80,21 +89,22 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
             }
         };
     }, [grid]);
-    
-    const minBoardWidth = grid && grid[0] ? grid[0].length * cellSize : 100;
-    const minBoardHeight = grid ? grid.length * cellSize : 100;
+
+    // Calculate the actual board size based on cell size (for rendering only)
+    const boardWidth = grid && grid[0] ? grid[0].length * cellSize : 300;
+    const boardHeight = grid ? grid.length * cellSize : 300;
 
     return (
         <Box 
             sx={{
                 width: '100%',
-                height: '100%',
+                maxWidth: '100%',
+                maxHeight: '70vh', // Limit height to prevent takeover
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                overflow: 'hidden',
-                minWidth: minBoardWidth,
-                minHeight: minBoardHeight,
+                overflow: 'auto', // Enable scrolling if needed
+                padding: 1,
             }}
         >
             <Box
@@ -103,13 +113,10 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                     display: 'flex',
                     flexDirection: 'column',
                     border: `2px solid ${theme.palette.grey[900]}`,
-                    width: '100%',
-                    height: '100%',
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    minWidth: minBoardWidth,
-                    minHeight: minBoardHeight,
+                    width: boardWidth, // Use calculated width
+                    height: boardHeight, // Use calculated height
                     margin: 'auto',
+                    flexShrink: 0, // Prevent shrinking
                 })}
             >
                 {grid.map((row, rowIndex) => (
@@ -117,7 +124,7 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                         key={rowIndex} 
                         sx={{
                             display: 'flex',
-                            flex: 1,
+                            height: cellSize,
                             width: '100%',
                         }}
                     >

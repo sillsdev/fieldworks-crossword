@@ -1,4 +1,4 @@
-import { Container, Box, Typography, Button } from '@mui/material';
+import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import CrosswordBoard from './components/Crossword/CrosswordBoard';
 import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
@@ -7,6 +7,7 @@ import { useState } from 'react';
 
 function App() {
   const [crosswordData, setCrosswordData] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const { 
     handleCheckClick, 
@@ -18,8 +19,17 @@ function App() {
     formattedClues
   } = useCrossword(crosswordData);
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   const handleCrosswordGenerated = (data: any) => {
     setCrosswordData(data);
+    handleCloseModal(); // Close the modal after generating the crossword
   };
 
   return (
@@ -36,10 +46,36 @@ function App() {
         pt: 4
       }}
     >
-      <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
+      {/* Modal/Dialog for language selection */}
+      <Dialog 
+        open={isModalOpen} 
+        onClose={handleCloseModal}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Generate New Puzzle</DialogTitle>
+        <DialogContent>
+          <Box sx={{ py: 2 }}>
+            <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+{}
+      {/* 
+      {!crosswordData && (
+        <Box sx={{ mb: 4, width: '100%' }}>
+          <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
+        </Box>
+      )}
+        */
+    }
+
       <Box sx={{ 
         width: '100%',
-        maxWidth: 600,
+        maxWidth: 900,
         textAlign: 'center',
         padding: { xs: 2, sm: 4 },
         borderRadius: 2,
@@ -57,37 +93,60 @@ function App() {
         <Box 
           sx={{ 
             display: 'flex', 
-            flexDirection: 'column', 
+            flexDirection: { xs: 'column', md: 'row' }, 
             justifyContent: 'center', 
-            alignItems: 'center', 
-            mt: { xs: 2, sm: 4 } 
+            alignItems: { xs: 'center', md: 'flex-start' }, 
+            mt: { xs: 2, sm: 4 },
+            gap: 3
           }}
         >
-          <CrosswordBoard
-            grid={grid}
-            handleClick={handleClick}
-            isActiveCell={isActiveCell}
-           />
-          <Button 
-            onClick={handleCheckClick}
-            variant="contained"
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <CrosswordBoard
+              grid={grid}
+              handleClick={handleClick}
+              isActiveCell={isActiveCell}
+             />
+            <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+              <Button 
+                onClick={handleCheckClick}
+                variant="contained"
+                sx={{ 
+                  width: 'fit-content',
+                  px: { xs: 2, sm: 3 },
+                  py: { xs: 1, sm: 1.5 },
+                }}
+              >
+                Check
+              </Button>
+              <Button 
+                onClick={handleOpenModal}
+                variant="outlined"
+                sx={{ 
+                  width: 'fit-content',
+                  px: { xs: 2, sm: 3 },
+                  py: { xs: 1, sm: 1.5 },
+                }}
+              >
+                Generate New Puzzle
+              </Button>
+            </Box>
+          </Box>
+          <Box 
             sx={{ 
-              mt: 2, 
-              width: 'fit-content',
-              px: { xs: 2, sm: 3 },
-              py: { xs: 1, sm: 1.5 },
+              width: { xs: '100%', md: '40%' }, 
+              maxHeight: { xs: '300px', md: '500px' },
+              overflow: 'auto',
+              textAlign: 'left',
+              mt: { xs: 3, md: 0 }
             }}
           >
-            Check
-          </Button>
+            <CrosswordClues 
+              clues={formattedClues}
+              onClueClick={handleClueClick}
+              activeClue={activeClue}
+            />
+          </Box>
         </Box>
-      </Box>
-      <Box sx={{ width: '100%', maxWidth: 600, mt: 3 }}>
-        <CrosswordClues 
-          clues={formattedClues}
-          onClueClick={handleClueClick}
-          activeClue={activeClue}
-        />
       </Box>
     </Container>
   );

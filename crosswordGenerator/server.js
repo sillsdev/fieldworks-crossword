@@ -113,8 +113,7 @@ app.get("/generate-crossword", async (req, res) => {
         const apiResponse = await axios.get(apiUrl);
         // filter words
         const filteredData = apiResponse.data.filter(entry => {
-            let word = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];
-            return validateWord(word);
+            return validateWord(entry, languageCode);
         });
         let my10Words = chooseRandomWords(filteredData, 10);
         // make chosen words into an object
@@ -122,9 +121,15 @@ app.get("/generate-crossword", async (req, res) => {
             // Define clue for each entry
             let clue = (entry.senses[0].definition.hasOwnProperty(analysisLanguage) ? entry.senses[0].definition[analysisLanguage] : Object.values(entry.senses[0].definition)[0]) 
                 || (entry.senses[0].gloss.hasOwnProperty(analysisLanguage) ? entry.senses[0].gloss[analysisLanguage] : Object.values(entry.senses[0].gloss)[0]);
+            let answer = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];
+            if (answer) {
+               answer = answer.normalize("NFC");
+            } else {
+                answer = Object.values(entry.citationForm)[0] || Object.values(entry.lexemeForm)[0];
+            }
             return {
                 clue: clue,
-                answer: (entry.citationForm[languageCode] || entry.lexemeForm[languageCode]).normalize("NFC")
+                answer: answer
             };
         });
         var layout = generateLayout(input);
@@ -163,7 +168,14 @@ function chooseRandomWords(dictionaryWords, numWords) {
 // make sure word does not contain spaces or numbers
 // makes sure it is between 4 and 10 characters long
 // this can be added to if we determine more validation is needed
-function validateWord(word) {
+function validateWord(entry, languageCode) {
+    let word = "";
+    if (entry.citationForm[languageCode] || entry.lexemeForm[languageCode]) {
+        word = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];
+    }
+    else {
+        word = Object.values(entry.citationForm)[0] || Object.values(entry.lexemeForm)[0];
+    }
     word = word.normalize("NFC");
     return word.length <= 10 && word.length >= 4 && !/[\s\d]/.test(word);
 }

@@ -1,18 +1,82 @@
 [
-    {
-      "clue": "Opposite of cold",
-      "answer": "hot",
-      "startx": 1,
-      "starty": 1,
-      "position": 1,
-      "orientation": "across"
-    },
-    {
-      "clue": "Place to sleep",
-      "answer": "bed",
-      "startx": 1,
-      "starty": 1,
-      "position": 2,
-      "orientation": "down"
-    }
-  ]
+  {
+    "clue": "money",
+    "answer": "kobiri",
+    "startx": 8,
+    "starty": 9,
+    "position": 1,
+    "orientation": "across"
+  },
+  {
+    "clue": "swell",
+    "answer": "bzimba",
+    "startx": 2,
+    "starty": 6,
+    "position": 2,
+    "orientation": "down"
+  },
+  {
+    "clue": "choke (plant)",
+    "answer": "dyiwa",
+    "startx": 7,
+    "starty": 4,
+    "position": 3, 
+    "orientation": "down"
+  },
+  {
+    "clue": "pasturage",
+    "answer": "thongwe",
+    "startx": 12,
+    "starty": 1,
+    "position": 4,
+    "orientation": "down"
+  },
+  {
+    "clue": "one or two place bench without a back",
+    "answer": "mpando",
+    "startx": 9,
+    "starty": 4,
+    "position": 5,
+    "orientation": "down"
+  },
+  {
+    "clue": "remove, release prisoner",
+    "answer": "bulusira",
+    "startx": 2,
+    "starty": 6,
+    "position": 2,
+    "orientation": "across"
+  },
+  {
+    "clue": "threshing floor",
+    "answer": "guwa",
+    "startx": 5,
+    "starty": 5,
+    "position": 6,
+    "orientation": "down"
+  },
+  {
+    "clue": "tree type",
+    "answer": "ntsekese",
+    "startx": 9,
+    "starty": 7,
+    "position": 7,
+    "orientation": "across"
+  },
+  {
+    "clue": "not able",
+    "answer": "cimwana",
+    "startx": 1,
+    "starty": 8,
+    "position": 8,
+    "orientation": "across"
+  },
+  {
+    "clue": "submerge",
+    "answer": "bidza",
+    "startx": 2,
+    "starty": 10,
+    "position": 9,
+    "orientation": "across"
+  }
+]

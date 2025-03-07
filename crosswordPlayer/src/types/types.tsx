@@ -8,7 +8,20 @@ export interface LanguageData {
 }
 
 export interface LanguageSelectorProps {
-    onCrosswordGenerated: (crosswordData: any) => void;
+    onCrosswordGenerated: (crosswordData: CrosswordData) => void;
+    selectedProject: string;
+    selectedLanguage: string;
+    selectedAnalysis: string;
+    selectedPublication: string;
+    setSelectedProject: (project: string) => void;
+    setSelectedLanguage: (language: string) => void;
+    setSelectedAnalysis: (analysis: string) => void;
+    setSelectedPublication: (publication: string) => void;
+}
+
+export interface Publication {
+    publicationName: string;
+    publicationID: string;
 }
 
 export interface CrosswordCellProps {
@@ -18,6 +31,7 @@ export interface CrosswordCellProps {
     isBlocked?: boolean;
     isCorrect?: boolean;
     isIncorrect?: boolean;
+    isPartOfActiveWord?: boolean;
     onClick?: (event: React.MouseEvent) => void;
     onKeyDown?: (event: React.KeyboardEvent) => void;
     width?: number;
@@ -31,6 +45,7 @@ export interface CrosswordCluesProps {
     };
     onClueClick?: (type: 'across' | 'down', number: number) => void;
     activeClue?: { type: 'across' | 'down'; number: number } | null;
+    correctWords: string[];
 }
 
 export interface UseClueInteractionProps {
@@ -78,4 +93,13 @@ export interface CrosswordData {
         position: number;
         orientation: 'across' | 'down';
     }>;
+}
+
+export interface CrosswordBoardProps {
+    grid: CellData[][];
+    handleClick: (rowIndex: number, colIndex: number) => void;
+    isActiveCell: (rowIndex: number, colIndex: number) => boolean;
+    handleInput: (char: string) => void;
+    activeCell: ActiveCellPosition | null;
+    activeDirection: Direction | null;
 }

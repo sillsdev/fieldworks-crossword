@@ -98,8 +98,8 @@ function distance(x1, y1, x2, y2){
   function computeDimension(words, factor){
     var temp = 0;
     for(let i = 0; i < words.length; i++){
-      if(temp < words[i].answer.length){
-        temp = words[i].answer.length;
+      if(temp < words[i].answer.normalize("NFC").length){
+        temp = words[i].answer.normalize("NFC").length;
       }
     }
   
@@ -273,7 +273,7 @@ function distance(x1, y1, x2, y2){
       var best = [-1];
       for(let innerIndex in words){
         if("answer" in words[innerIndex] && !("startx" in words[innerIndex])){
-          var temp = attemptToInsert(rows, cols, table, weights, verticalCount, totalCount, words[innerIndex].answer, innerIndex);
+          var temp = attemptToInsert(rows, cols, table, weights, verticalCount, totalCount, words[innerIndex].answer.normalize("NFC"), innerIndex);
           if(temp[0] > best[0]){
             best = temp;
           }
@@ -314,7 +314,7 @@ function distance(x1, y1, x2, y2){
       if(word.orientation == "across"){
         var i = word.starty - 1;
         var j = word.startx - 1;
-        for(let k = 0; k < word.answer.length; k++){
+        for(let k = 0; k < word.answer.normalize("NFC").length; k++){
           if(newTable[i][j + k] == "-"){
             newTable[i][j + k] = "O";
           }
@@ -326,7 +326,7 @@ function distance(x1, y1, x2, y2){
       else if(word.orientation == "down"){
         var i = word.starty - 1;
         var j = word.startx - 1;
-        for(let k = 0; k < word.answer.length; k++){
+        for(let k = 0; k < word.answer.normalize("NFC").length; k++){
           if(newTable[i + k][j] == "-"){
             newTable[i + k][j] = "O";
           }
@@ -344,7 +344,7 @@ function distance(x1, y1, x2, y2){
       if(word.orientation == "across"){
         var i = word.starty - 1;
         var j = word.startx - 1;
-        for(let k = 0; k < word.answer.length; k++){
+        for(let k = 0; k < word.answer.normalize("NFC").length; k++){
           if(newTable[i][j + k] == "X"){
             isIsolated = false;
             break;
@@ -354,7 +354,7 @@ function distance(x1, y1, x2, y2){
       else if(word.orientation == "down"){
         var i = word.starty - 1;
         var j = word.startx - 1;
-        for(let k = 0; k < word.answer.length; k++){
+        for(let k = 0; k < word.answer.normalize("NFC").length; k++){
           if(newTable[i + k][j] == "X"){
             isIsolated = false;
             break;
@@ -376,15 +376,15 @@ function distance(x1, y1, x2, y2){
       if(word.orientation == "across"){
         var i = word.starty - 1;
         var j = word.startx - 1;
-        for(let k = 0; k < word.answer.length; k++){
-          newTable[i][j + k] = word.answer.charAt(k);
+        for(let k = 0; k < word.answer.normalize("NFC").length; k++){
+          newTable[i][j + k] = word.answer.normalize("NFC").charAt(k);
         }
       }
       else if(word.orientation == "down"){
         var i = word.starty - 1;
         var j = word.startx - 1;
-        for(let k = 0; k < word.answer.length; k++){
-          newTable[i + k][j] = word.answer.charAt(k);
+        for(let k = 0; k < word.answer.normalize("NFC").length; k++){
+          newTable[i + k][j] = word.answer.normalize("NFC").charAt(k);
         }
       }
     }

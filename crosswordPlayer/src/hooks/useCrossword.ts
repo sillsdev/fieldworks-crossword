@@ -281,6 +281,8 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         activeClue,
         handleKeyDown,
         handleClick,
-        formattedClues
+        formattedClues,
+        activeCell,
+        activeDirection
     };
 }

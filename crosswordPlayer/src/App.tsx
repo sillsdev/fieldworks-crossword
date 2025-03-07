@@ -16,7 +16,9 @@ function App() {
     grid, 
     handleClick, 
     isActiveCell,
-    formattedClues
+    formattedClues,
+    activeCell, // Add this state
+    activeDirection // Add this state
   } = useCrossword(crosswordData);
 
   const handleOpenModal = () => {
@@ -97,47 +99,49 @@ function App() {
             justifyContent: 'center', 
             alignItems: { xs: 'center', md: 'flex-start' }, 
             mt: { xs: 2, sm: 4 },
-            gap: 3
+            gap: 3,
+            width: '100%'
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            width: { xs: '100%', md: '60%' }
+          }}>
             <CrosswordBoard
               grid={grid}
               handleClick={handleClick}
               isActiveCell={isActiveCell}
-             />
-            <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-              <Button 
-                onClick={handleCheckClick}
-                variant="contained"
-                sx={{ 
-                  width: 'fit-content',
-                  px: { xs: 2, sm: 3 },
-                  py: { xs: 1, sm: 1.5 },
-                }}
-              >
-                Check
-              </Button>
-              <Button 
-                onClick={handleOpenModal}
-                variant="outlined"
-                sx={{ 
-                  width: 'fit-content',
-                  px: { xs: 2, sm: 3 },
-                  py: { xs: 1, sm: 1.5 },
-                }}
-              >
-                Generate New Puzzle
-              </Button>
-            </Box>
+              activeCell={activeCell} 
+              activeDirection={activeDirection} 
+            />
           </Box>
           <Box 
             sx={{ 
               width: { xs: '100%', md: '40%' }, 
-              maxHeight: { xs: '300px', md: '500px' },
-              overflow: 'auto',
+              height: { md: 'auto' },
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto',
               textAlign: 'left',
-              mt: { xs: 3, md: 0 }
+              mt: { xs: 3, md: 0 },
+              // Ensure the height matches the board on md screens and above
+              alignSelf: { md: 'stretch' },
+              // Add scrollbar styling
+              '&::-webkit-scrollbar': {
+                width: '8px',
+                height: '8px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'rgba(0,0,0,0.2)',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: 'rgba(0,0,0,0.05)',
+              },
+              // Ensure scrolling behavior is smooth
+              scrollBehavior: 'smooth',
             }}
           >
             <CrosswordClues 
@@ -146,6 +150,36 @@ function App() {
               activeClue={activeClue}
             />
           </Box>
+        </Box>
+        
+        <Box sx={{ 
+          mt: 3, 
+          display: 'flex', 
+          gap: 2,
+          justifyContent: 'center' 
+        }}>
+          <Button 
+            onClick={handleCheckClick}
+            variant="contained"
+            sx={{ 
+              width: 'fit-content',
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1, sm: 1.5 },
+            }}
+          >
+            Check
+          </Button>
+          <Button 
+            onClick={handleOpenModal}
+            variant="contained"
+            sx={{ 
+              width: 'fit-content',
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1, sm: 1.5 },
+            }}
+          >
+            Generate New Puzzle
+          </Button>
         </Box>
       </Box>
     </Container>

@@ -1,10 +1,25 @@
 import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
 import { useEffect, useState, useRef, useMemo } from 'react';
+import { CellData } from '../../hooks/useCrossword';
 
-const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
-    const MIN_CELL_SIZE = 30; // Minimum usable cell size
-    const MAX_CELL_SIZE = 50; // Maximum cell size for readability
+interface CrosswordBoardProps {
+    grid: CellData[][];
+    handleClick: (row: number, col: number) => void;
+    isActiveCell: (row: number, col: number) => boolean;
+    activeCell?: { row: number; col: number } | null;
+    activeDirection?: 'across' | 'down';
+}
+
+const CrosswordBoard = ({ 
+    grid, 
+    handleClick, 
+    isActiveCell, 
+    activeCell, 
+    activeDirection 
+}: CrosswordBoardProps) => {
+    const MIN_CELL_SIZE = 35; // Minimum usable cell size
+    const MAX_CELL_SIZE = 55; // Maximum cell size for readability
     
     const [cellSize, setCellSize] = useState(MIN_CELL_SIZE); 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -94,17 +109,82 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
     const boardWidth = grid && grid[0] ? grid[0].length * cellSize : 300;
     const boardHeight = grid ? grid.length * cellSize : 300;
 
+    // This function determines if a cell is part of the active word
+    const isPartOfActiveWord = (rowIndex: number, colIndex: number): boolean => {
+        if (!activeCell || !activeDirection) return false;
+        
+        // If this is the active cell, it's definitely not *just* part of the word
+        if (activeCell.row === rowIndex && activeCell.col === colIndex) return false;
+        
+        const cell = grid[rowIndex][colIndex];
+        if (!cell || cell.isBlocked) return false;
+        
+        if (activeDirection === 'across') {
+            // For across words, cells must be in the same row as the active cell
+            if (rowIndex !== activeCell.row) return false;
+            
+            // Find the bounds of the word
+            let startCol = activeCell.col;
+            let endCol = activeCell.col;
+            
+            // Find the leftmost cell in this word
+            while (startCol > 0 && !grid[rowIndex][startCol - 1].isBlocked) {
+                startCol--;
+            }
+            
+            // Find the rightmost cell in this word
+            while (endCol < grid[0].length - 1 && !grid[rowIndex][endCol + 1].isBlocked) {
+                endCol++;
+            }
+            
+            // Return true if the cell is within the bounds of the word
+            return colIndex >= startCol && colIndex <= endCol;
+        } else {
+            // For down words, cells must be in the same column as the active cell
+            if (colIndex !== activeCell.col) return false;
+            
+            // Find the bounds of the word
+            let startRow = activeCell.row;
+            let endRow = activeCell.row;
+            
+            // Find the topmost cell in this word
+            while (startRow > 0 && !grid[startRow - 1][colIndex].isBlocked) {
+                startRow--;
+            }
+            
+            // Find the bottommost cell in this word
+            while (endRow < grid.length - 1 && !grid[endRow + 1][colIndex].isBlocked) {
+                endRow++;
+            }
+            
+            // Return true if the cell is within the bounds of the word
+            return rowIndex >= startRow && rowIndex <= endRow;
+        }
+    };
+
     return (
         <Box 
             sx={{
                 width: '100%',
                 maxWidth: '100%',
-                maxHeight: '70vh', // Limit height to prevent takeover
+                maxHeight: '70vh',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                overflow: 'auto', // Enable scrolling if needed
+                overflowY: 'auto',
                 padding: 1,
+                // Add some styling for better scrolling experience
+                '&::-webkit-scrollbar': {
+                    width: '8px',
+                    height: '8px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(0,0,0,0.2)',
+                    borderRadius: '4px',
+                },
+                '&::-webkit-scrollbar-track': {
+                    backgroundColor: 'rgba(0,0,0,0.05)',
+                },
             }}
         >
             <Box
@@ -113,10 +193,10 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                     display: 'flex',
                     flexDirection: 'column',
                     border: `2px solid ${theme.palette.grey[900]}`,
-                    width: boardWidth, // Use calculated width
-                    height: boardHeight, // Use calculated height
+                    width: boardWidth,
+                    height: boardHeight,
                     margin: 'auto',
-                    flexShrink: 0, // Prevent shrinking
+                    flexShrink: 0,
                 })}
             >
                 {grid.map((row, rowIndex) => (
@@ -134,6 +214,7 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                                 value={cell.value}
                                 number={cell.number}
                                 isActive={isActiveCell(rowIndex, colIndex)}
+                                isPartOfActiveWord={isPartOfActiveWord(rowIndex, colIndex)}
                                 isCorrect={showCorrectFeedback && cell.isCorrect}
                                 isIncorrect={showIncorrectFeedback && cell.isIncorrect && !cell.isCorrect}
                                 isBlocked={cell.isBlocked}

@@ -1,51 +1,130 @@
 import { useState, useEffect } from 'react';
 import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import useLanguageGenerator from '../hooks/useLanguageGenerator';
-import { LanguageData, LanguageSelectorProps } from '../types/types';
+import { LanguageSelectorProps } from '../types/types';
 
 const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
-    const { fetchLanguages, loading, error, generateCrossword } = useLanguageGenerator(); 
+    const {
+        fetchProjects, 
+        // loading, 
+        // error, 
+        generateCrossword,
+        fetchVernacularLanguages,
+        fetchAnalysisLanguages
+     } = useLanguageGenerator(); 
+    const [projects, setProjects] = useState<string[]>([]);
+    const [selectedProject, setSelectedProject] = useState<string>('');
     const [selectedLanguage, setSelectedLanguage] = useState<string>('');
-    const [menuLanguages, setMenuLanguages] = useState<LanguageData[]>([]);
+    const [selectedAnalysis, setSelectedAnalysis] = useState<string>('');
+    const [menuLanguages, setMenuLanguages] = useState<string[]>([]);
+    const [analysisLanguages, setAnalysisLanguages] = useState<string[]>([]);
 
     useEffect(() => {
         const loadProjects = async () => {
           try {
-            const fetchedLanguages = await fetchLanguages();
-            if (fetchedLanguages) {
-              setMenuLanguages(fetchedLanguages);
+            const fetchedProjects = await fetchProjects();
+            if (fetchedProjects) {
+              setProjects(fetchedProjects);
             }
           } catch (err) {
             console.error("Error fetching languages:", err);
           }
         };
         
-        loadLanguages();
-    }, [fetchLanguages]);
+        loadProjects();
+    }, [fetchProjects]);
+
+    const handleProjectChange = async (event: SelectChangeEvent) => {
+        const value = event.target.value;
+        const selected = projects.find(project => project === value);
+        if (selected) {
+            setSelectedProject(value);
+            setSelectedLanguage('');
+            try {
+                const languages = await fetchVernacularLanguages(selected);
+                if (languages) {
+                    const languageCodes = languages.flat().filter(Boolean);
+                    setMenuLanguages(languageCodes);
+                }
+            } catch (err) {
+                console.error("Error fetching languages:", err);
+            }
+        }
+    };
 
     const handleLanguageChange = async (event: SelectChangeEvent) => {
         const value = event.target.value;
-        const selected = menuLanguages.find(lang => `${lang.projectName}-${lang.languageCode}` === value);
         
-        if (selected) {
+        if (value) {
           setSelectedLanguage(value);
+
           try {
-            const crosswordData = await generateCrossword(
-                selected.projectName, 
-                selected.languageCode.languageName, 
-            );
-            if (crosswordData) {
-                onCrosswordGenerated(crosswordData);
+            const analysisLanguages = await fetchAnalysisLanguages(selectedProject);
+            if (analysisLanguages) {
+                const languages = analysisLanguages.flat().filter(Boolean);
+                setAnalysisLanguages(languages);
             }
+            // const crosswordData = await generateCrossword(
+            //     selectedProject, 
+            //     value, 
+            // );
+            // if (crosswordData) {
+            //     onCrosswordGenerated(crosswordData);
+            // }
           } catch (err) {
             console.error("Error generating crossword:", err);
           }
         }
     };
 
+    const handleAnalysisChange = async (event: SelectChangeEvent) => {
+        const value = event.target.value;
+        
+        if (value) {
+            setSelectedAnalysis(value);
+            try {
+                const crosswordData = await generateCrossword(
+                    selectedProject, 
+                    selectedLanguage, 
+                );
+            if (crosswordData) {
+                onCrosswordGenerated(crosswordData);
+            }
+            } catch (err) {
+                console.error("Error generating crossword:", err);
+            }
+        }
+    };
+
     return (
         <Box sx={{ width: '100%', maxWidth: 600, mb: 3 }}>
             <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                <InputLabel id="project-select-label">Select Project</InputLabel>
+                <Select
+                    labelId="project-select-label"
+                    id="project-select"
+                    value={selectedProject}
+                    label="Select Project"
+                    onChange={handleProjectChange}
+                >
+                    {projects.map((project) => (
+                        <MenuItem
+                            key={project}
+                            value={project}
+                        >
+                            {project}
+                        </MenuItem>
+                        ))
+                    }
+                </Select>
+            </FormControl> 
+
+            <FormControl 
+                fullWidth 
+                size="small" 
+                sx={{ mb: 2 }}
+                disabled={!selectedProject || menuLanguages.length === 0}
+            >
                 <InputLabel id="language-select-label">Select Language</InputLabel>
                 <Select
                     labelId="language-select-label"
@@ -53,28 +132,45 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
                     value={selectedLanguage}
                     label="Select Language"
                     onChange={handleLanguageChange}
-                    disabled={loading}
                 >
-                    {loading ? (
-                        <MenuItem disabled>Loading languages...</MenuItem>
-                    ) : error ? (
-                        <MenuItem disabled>Error: {error}</MenuItem>
-                    ) : menuLanguages.length === 0 ? (
-                        <MenuItem disabled>No languages available</MenuItem>
-                    ) : (
-                        menuLanguages.map((language) => (
-                            <MenuItem
-                                key={`${language.projectName}-${language.languageCode}`}
-                                value={`${language.projectName}-${language.languageCode}`}
-                            >
-                                {language.projectName} ({language.languageCode.languageName})
-                            </MenuItem>
-                        ))
-                    )}
+                    {menuLanguages.map((language) => (
+                        <MenuItem
+                            key={language}
+                            value={language}
+                        >
+                            {language}
+                        </MenuItem>
+                    ))}
                 </Select>
-            </FormControl> 
+            </FormControl>
+
+            <FormControl 
+                fullWidth 
+                size="small" 
+                sx={{ mb: 2 }}
+                disabled={!selectedProject && !selectedLanguage}
+            >
+                <InputLabel id="analysis-select-label">Select Analysis Language</InputLabel>
+                <Select
+                    labelId="analysis-select-label"
+                    id="analysis-select"
+                    value={selectedAnalysis}
+                    label="Select Analysis Language"
+                    onChange={handleAnalysisChange}
+                >
+                    {analysisLanguages.map((language) => (
+                        <MenuItem
+                            key={language}
+                            value={language}
+                        >
+                            {language}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
         </Box>
     );
 };
+
 
 export default LanguageSelector;

@@ -8,7 +8,13 @@ export interface LanguageData {
 }
 
 export interface LanguageSelectorProps {
-    onCrosswordGenerated: (crosswordData: any) => void;
+    onCrosswordGenerated: (crosswordData: CrosswordData) => void;
+    selectedProject: string;
+    selectedLanguage: string;
+    selectedAnalysis: string;
+    setSelectedProject: (project: string) => void;
+    setSelectedLanguage: (language: string) => void;
+    setSelectedAnalysis: (analysis: string) => void;
 }
 
 export interface CrosswordCellProps {

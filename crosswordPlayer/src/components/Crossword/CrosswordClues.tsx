@@ -6,11 +6,13 @@ const Clue = ({
   type, 
   clue, 
   isActive, 
+  isCorrect, 
   onClueClick 
 }: { 
   type: 'across' | 'down';
   clue: { number: number; clue: string };
   isActive: boolean;
+  isCorrect: boolean; 
   onClueClick?: (type: 'across' | 'down', number: number) => void;
 }) => {
   const { handleClick, getStyles } = useClueInteraction({ isActive, onClueClick, type, number: clue.number });
@@ -18,7 +20,16 @@ const Clue = ({
   return (
     <ListItem 
       key={`${type}-${clue.number}`}
-      sx={getStyles}
+      sx={{
+        ...getStyles,
+        textDecoration: isCorrect ? 'line-through' : 'none', 
+        backgroundColor: isCorrect ? '#c8e6c9' : 'inherit', 
+        color: isCorrect ? '#004400' : 'inherit', 
+        cursor: 'pointer',
+        '&:hover': {
+          backgroundColor: isActive ? '#e3f2fd' : '#f0f0f0', 
+        },
+      }}
       onClick={handleClick}
     >
       <Typography>
@@ -33,6 +44,7 @@ const CrosswordClues: React.FC<CrosswordCluesProps> = ({
   clues,
   onClueClick,
   activeClue = null,
+  correctWords 
 }) => {
   return (
     <Box sx={(theme) => ({
@@ -55,6 +67,7 @@ const CrosswordClues: React.FC<CrosswordCluesProps> = ({
               type="across"
               clue={clue}
               isActive={activeClue?.type === 'across' && activeClue?.number === clue.number}
+              isCorrect={correctWords.includes(`across-${clue.number}`)} 
               onClueClick={onClueClick}
             />
           ))}
@@ -70,6 +83,7 @@ const CrosswordClues: React.FC<CrosswordCluesProps> = ({
               type="down"
               clue={clue}
               isActive={activeClue?.type === 'down' && activeClue?.number === clue.number}
+              isCorrect={correctWords.includes(`down-${clue.number}`)} 
               onClueClick={onClueClick}
             />
           ))}

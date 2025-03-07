@@ -1,31 +1,31 @@
 import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
 import { useEffect, useState, useRef, useMemo } from 'react';
-import { CellData } from '../../hooks/useCrossword';
-
-interface CrosswordBoardProps {
-    grid: CellData[][];
-    handleClick: (row: number, col: number) => void;
-    isActiveCell: (row: number, col: number) => boolean;
-    activeCell?: { row: number; col: number } | null;
-    activeDirection?: 'across' | 'down';
-}
+import { CrosswordBoardProps } from '../../types/types';
 
 const CrosswordBoard = ({ 
     grid, 
     handleClick, 
     isActiveCell, 
     activeCell, 
-    activeDirection 
+    activeDirection,
+    handleInput
 }: CrosswordBoardProps) => {
     const MIN_CELL_SIZE = 35; // Minimum usable cell size
     const MAX_CELL_SIZE = 55; // Maximum cell size for readability
-    
-    const [cellSize, setCellSize] = useState(MIN_CELL_SIZE); 
+    const [cellSize, setCellSize] = useState(40); 
     const containerRef = useRef<HTMLDivElement>(null);
     const [showCorrectFeedback, setShowCorrectFeedback] = useState(false);
     const [showIncorrectFeedback, setShowIncorrectFeedback] = useState(false);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    },[isActiveCell]);
     
     // Calculate grid dimensions only when row/column count changes
     const gridDimensions = useMemo(() => {
@@ -34,7 +34,7 @@ const CrosswordBoard = ({
             cols: grid?.[0]?.length || 0
         };
     }, [grid?.length, grid?.[0]?.length]);
-    
+
     useEffect(() => {
         if (!grid || grid.length === 0) return;
         
@@ -187,6 +187,28 @@ const CrosswordBoard = ({
                 },
             }}
         >
+            <input
+                ref={inputRef}
+                type="text"
+                style={{ 
+                    position: 'absolute', 
+                    opacity: 0, 
+                    pointerEvents: 'none' 
+                }}
+                onCompositionEnd={(e) => {
+                    const finalChar = e.data.slice(-1);
+                    handleInput(finalChar);
+                    e.currentTarget.value = '';
+                }}
+                onChange={(e) => {
+                    if (e.target.value) {
+                        const char = e.target.value.slice(-1);
+                        handleInput(char);
+                        e.target.value = '';
+                    }
+                }}
+                autoFocus
+            />
             <Box
                 ref={containerRef}
                 sx={(theme) => ({
@@ -199,7 +221,7 @@ const CrosswordBoard = ({
                     flexShrink: 0,
                 })}
             >
-                {grid.map((row, rowIndex) => (
+                {grid.map((row, rowIndex: number) => (
                     <Box 
                         key={rowIndex} 
                         sx={{
@@ -208,7 +230,7 @@ const CrosswordBoard = ({
                             width: '100%',
                         }}
                     >
-                        {row.map((cell, colIndex) => (
+                        {row.map((cell, colIndex: number) => (
                             <CrosswordCell 
                                 key={`cell-${rowIndex}-${colIndex}`}
                                 value={cell.value}

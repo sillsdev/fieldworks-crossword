@@ -19,6 +19,7 @@ const App = () => {
     handleClick, 
     isActiveCell,
     formattedClues,
+    handleInput,
     activeCell,
     activeDirection, 
     correctWords
@@ -113,6 +114,7 @@ const App = () => {
               grid={grid}
               handleClick={handleClick}
               isActiveCell={isActiveCell}
+            handleInput={handleInput}
               activeCell={activeCell} 
               activeDirection={activeDirection} 
             />

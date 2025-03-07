@@ -77,7 +77,7 @@ app.get("/generate-crossword", async (req, res) => {
             let word = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];
             return validateWord(word);
         });
-        let my10Words = chooseRandomWords(filteredData, 3);
+        let my10Words = chooseRandomWords(filteredData, 10);
         // make chosen words into an object
         const input = my10Words.map(entry => {
             // Define clue for each entry

@@ -331,8 +331,6 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         newGrid[row][col].isIncorrect = false;
         setGrid(newGrid);
 
-        // Move to the next cell
-        handleTyping(character);
     }, [activeCell, grid, activeDirection]);
 
     function handleTyping(character: string) {

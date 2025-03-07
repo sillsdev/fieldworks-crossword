@@ -7,7 +7,7 @@ const CellContainer = styled(Box, {
     prop !== 'isBlocked' && 
     prop !== 'isCorrect' && 
     prop !== 'isIncorrect' &&
-    prop !== 'isPartOfActiveWord' && // Add this to excluded props
+    prop !== 'isPartOfActiveWord' && 
     prop !== 'width' &&
     prop !== 'height',
 })<{
@@ -15,7 +15,7 @@ const CellContainer = styled(Box, {
   isBlocked?: boolean;
   isIncorrect?: boolean;
   isCorrect?: boolean;
-  isPartOfActiveWord?: boolean; // Add this type
+  isPartOfActiveWord?: boolean;
   width?: number;
   height?: number;
 }>(({ theme, isActive, isBlocked, isCorrect, isIncorrect, isPartOfActiveWord, width=40, height=40 }) => ({
@@ -26,26 +26,26 @@ const CellContainer = styled(Box, {
   justifyContent: 'center',
   alignItems: 'center',
   border: isBlocked
-    ? `2px solid ${theme.palette.grey[900]}` // Same color as background for blocked cells
+    ? `2px solid ${theme.palette.grey[900]}`
     : isCorrect
-      ? `2px solid #2e7d32`  // Darker green border
+      ? `2px solid #2e7d32`
       : isIncorrect
-        ? `2px solid #c62828`  // Darker red border
+        ? `2px solid #c62828`
         : isActive
           ? `2px solid ${theme.palette.primary.main}`
           : isPartOfActiveWord 
-            ? `2px solid ${theme.palette.primary.light}` 
+            ? `2px solid ${theme.palette.primary.light}`
             : `2px solid ${theme.palette.divider}`,
   backgroundColor: isCorrect
-    ? '#c8e6c9'  // Darker green background
+    ? '#c8e6c9'
     : isIncorrect
-      ? '#ffcdd2'  // Darker red background
+      ? '#ffcdd2'
       : isBlocked 
         ? theme.palette.grey[900]
         : isActive
-          ? '#e3f2fd'  // Light blue background for active cells
+          ? '#bbdefb'  // More prominent light blue background for active cells
           : isPartOfActiveWord
-            ? '#f0f7ff'  // Slightly lighter blue for word cells
+            ? '#f0f7ff'
             : theme.palette.background.paper,
   cursor: isBlocked ? 'default' : 'pointer',
   userSelect: 'none',
@@ -61,7 +61,7 @@ const CellNumber = styled(Typography)<{ isCorrect?: boolean; isIncorrect?: boole
   left: 2,
   fontSize: '0.7rem',
   fontWeight: 'bold',
-  color: isCorrect ? '#2e7d32' : isIncorrect ? '#c62828' : 'inherit', // Darker colors
+  color: isCorrect ? '#2e7d32' : isIncorrect ? '#c62828' : 'inherit',
 }));
 
 const CellContent = styled(Typography)<{ 
@@ -74,12 +74,14 @@ const CellContent = styled(Typography)<{
   fontWeight: 'bold',
   textTransform: 'uppercase',
   color: isCorrect 
-    ? '#004400'  // Darker green text
+    ? '#004400'
     : isIncorrect 
-      ? '#660000'  // Darker red text
-      : isActive || isPartOfActiveWord
-        ? 'darkblue'  // Dark blue for active cells and cells in active word
-        : 'inherit',
+      ? '#660000'
+      : isActive
+        ? 'darkblue'  // Dark blue for active cells
+        : isPartOfActiveWord
+          ? 'darkblue'
+          : 'inherit',
 }));
 
 const CrosswordCell: React.FC<CrosswordCellProps> = ({

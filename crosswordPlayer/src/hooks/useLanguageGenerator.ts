@@ -55,11 +55,6 @@ const useLanguageGenerator = () => {
       });
 
       const data = await response.json();
-      if (!data || !Array.isArray(data)) {
-        console.error("Invalid data format received:", data);
-        throw new Error("Invalid data format received from server");
-      }
-      console.log(data);
 
       return data;
     } catch (err) {

@@ -55,11 +55,9 @@ const LanguageSelector = ({
             setSelectedProject(value);
             setSelectedLanguage('');
             try {
-                const languages = await fetchVernacularLanguages(value);
-                if (languages) {
-                    const languageCode = languages.flat().filter(Boolean)[0];
-                    setSelectedLanguage(languageCode);
-
+                const language = await fetchVernacularLanguages(value);
+                if (language) {
+                    setSelectedLanguage(language);
                     try {
                         const analysisLanguages = await fetchAnalysisLanguages(value);
                         if (analysisLanguages) {

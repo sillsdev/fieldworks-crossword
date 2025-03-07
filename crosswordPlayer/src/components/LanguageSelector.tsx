@@ -23,6 +23,9 @@ const LanguageSelector = ({
     const [analysisLanguages, setAnalysisLanguages] = useState<string[]>([]);
 
     useEffect(() => {
+        setSelectedProject('');
+        setSelectedLanguage('');
+        setSelectedAnalysis('');
         const loadProjects = async () => {
           try {
             const fetchedProjects = await fetchProjects();

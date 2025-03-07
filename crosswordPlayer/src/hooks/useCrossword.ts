@@ -151,6 +151,16 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
 
         const newCorrectWords: string[] = []; // Track correct words
 
+        const updateGridCells = (cells, isCorrect) => {
+            cells.forEach(({ row, col }) => {
+                newGrid[row][col] = {
+                    ...newGrid[row][col],
+                    isCorrect: isCorrect,
+                    isIncorrect: !isCorrect
+                };
+            });
+        };
+
         words.forEach(word => {
             let userWord = '';
             let isComplete = true;
@@ -168,31 +178,47 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
             if (isComplete) {
                 const isCorrect = userWord.toUpperCase() === word.answer;
                 if (isCorrect) {
-                    result.correct++;
                     newCorrectWords.push(word.id); // Add correct word ID
-
-                    word.cells.forEach(({ row, col }) => {
-                        newGrid[row][col] = {
-                            ...newGrid[row][col],
-                            isCorrect: true,
-                            isIncorrect: false
-                        };
-                    });
-                } else {
-                    result.incorrect++;
-                    
-                    word.cells.forEach(({ row, col }) => {
-                        newGrid[row][col] = {
-                            ...newGrid[row][col],
-                            isCorrect: false,
-                            isIncorrect: true
-                        };
-                    });
                 }
-            } else {
-                result.incomplete++;
             }
         });
+
+        // Handle incorrect and incomplete words
+        words.forEach(word => {
+            if (!newCorrectWords.includes(word.id)) {
+                let userWord = '';
+                let isComplete = true;
+
+                word.cells.forEach(({ row, col }) => {
+                    if (row < grid.length && col < grid[0].length) {
+                        const cellVal = grid[row][col].value;
+                        if (!cellVal) {
+                            isComplete = false;
+                        }
+                        userWord += cellVal;
+                    }
+                });
+
+                if (isComplete) {
+                    result.incorrect++;
+                    updateGridCells(word.cells, false);
+                } else {
+                    result.incomplete++;
+                }
+            }
+        });
+
+        // Handle correct words
+        // Putting this here to avoid correct cells styled as incorrect
+        // (if a cell is part of both a correct and incorrect word)
+        newCorrectWords.forEach(wordId => {
+            const word = words.find(w => w.id === wordId);
+            if (word) {
+                result.correct++;
+                updateGridCells(word.cells, true);
+            }
+        });
+
         setGrid(newGrid);
         setCorrectWords(newCorrectWords); // Update correct words state
         return result;
@@ -285,6 +311,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
             newGrid[row][col].value = key.toUpperCase();
             setGrid(newGrid);
         }
+        
     };       
 
     const handleClick = (row: number, col: number) => {
@@ -335,8 +362,17 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
             setGrid(newGrid);
             return;
         }
+
+        // Reset all cells' isIncorrect properties
+        //TODO: This is a temporary fix to reset the incorrect status of all cells
+        //      when a new character is input. This should be handled more efficiently.
+        newGrid.forEach(row => {
+            row.forEach(cell => {
+                cell.isIncorrect = false;
+            });
+        });
         
-        // Regular character input (unchanged)
+        // Regular character input
         newGrid[row][col].value = character.toUpperCase();
         setGrid(newGrid);
     }, [activeCell, grid, activeDirection]);
@@ -346,7 +382,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         isActiveCell, 
         words,
         handleCheckClick,
-        handleShowAnswers, // Add this line
+        handleShowAnswers,
         handleClueClick,
         activeClue,
         handleKeyDown,

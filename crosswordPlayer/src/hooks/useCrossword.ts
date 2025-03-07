@@ -11,6 +11,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
     const [activeDirection, setActiveDirection] = useState<Direction>('across');
     const [words, setWords] = useState<Word[]>([]);
     const [activeClue, setActiveClue] = useState<{ type: 'across' | 'down'; number: number } | null>(null);
+    const [correctWords, setCorrectWords] = useState<string[]>([]); // Add this state
 
     const cluePositions = useMemo(() => {
         const positions: Record<string, { row: number; col: number }> = {};
@@ -147,6 +148,8 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
             total: words.length
         };
 
+        const newCorrectWords: string[] = []; // Track correct words
+
         words.forEach(word => {
             let userWord = '';
             let isComplete = true;
@@ -165,6 +168,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
                 const isCorrect = userWord.toUpperCase() === word.answer;
                 if (isCorrect) {
                     result.correct++;
+                    newCorrectWords.push(word.id); // Add correct word ID
 
                     word.cells.forEach(({ row, col }) => {
                         newGrid[row][col] = {
@@ -189,8 +193,9 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
             }
         });
         setGrid(newGrid);
+        setCorrectWords(newCorrectWords); // Update correct words state
         return result;
-    }, [grid]);
+    }, [grid, words]);
 
     const isActiveCell = (rowIndex: number, colIndex: number): boolean => {
         if (!activeCell) return false;
@@ -244,6 +249,7 @@ export const useCrossword = (crosswordData: CrosswordData | null = null) => {
         handleClick,
         formattedClues,
         activeCell,
-        activeDirection
+        activeDirection,
+        correctWords // Add correctWords to the return object
     };
 }

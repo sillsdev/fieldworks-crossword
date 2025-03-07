@@ -1,13 +1,15 @@
-import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Container, Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Backdrop } from '@mui/material';
 import CrosswordBoard from './components/Crossword/CrosswordBoard';
 import CrosswordClues from './components/Crossword/CrosswordClues';
 import { useCrossword } from './hooks/useCrossword';
 import LanguageSelector from './components/LanguageSelector';
 import { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 
-function App() {
+const App = () => {
   const [crosswordData, setCrosswordData] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const theme = useTheme();
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(true); // Set initial state to true
 
   const { 
     handleCheckClick, 
@@ -18,7 +20,8 @@ function App() {
     isActiveCell,
     formattedClues,
     activeCell, // Add this state
-    activeDirection // Add this state
+    activeDirection, // Add this state
+    correctWords // Add this state
   } = useCrossword(crosswordData);
 
   const handleOpenModal = () => {
@@ -41,11 +44,11 @@ function App() {
         height: '100vh', 
         display: 'flex', 
         flexDirection: 'column',
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
         alignItems: 'center',
         px: { xs: 2, sm: 4 },
         py: 2,
-        pt: 4
+        pt: 4,
       }}
     >
       {/* Modal/Dialog for language selection */}
@@ -54,6 +57,11 @@ function App() {
         onClose={handleCloseModal}
         fullWidth
         maxWidth="sm"
+        BackdropProps={{
+          style: {
+            backgroundColor: `${theme.palette.grey[900]}`,
+          },
+        }}
       >
         <DialogTitle>Generate New Puzzle</DialogTitle>
         <DialogContent>
@@ -65,15 +73,6 @@ function App() {
           <Button onClick={handleCloseModal}>Cancel</Button>
         </DialogActions>
       </Dialog>
-{}
-      {/* 
-      {!crosswordData && (
-        <Box sx={{ mb: 4, width: '100%' }}>
-          <LanguageSelector onCrosswordGenerated={handleCrosswordGenerated} />
-        </Box>
-      )}
-        */
-    }
 
       <Box sx={{ 
         width: '100%',
@@ -83,6 +82,10 @@ function App() {
         borderRadius: 2,
         boxShadow: 3,
         backgroundColor: 'background.paper',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}>
         <Typography 
           variant="h4" 
@@ -148,6 +151,7 @@ function App() {
               clues={formattedClues}
               onClueClick={handleClueClick}
               activeClue={activeClue}
+              correctWords={correctWords} // Pass correct words
             />
           </Box>
         </Box>
@@ -184,6 +188,6 @@ function App() {
       </Box>
     </Container>
   );
-}
+};
 
 export default App;

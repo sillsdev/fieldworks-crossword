@@ -75,7 +75,7 @@ const LanguageSelector = ({
 
                         const fetchedPublications = await fetchPublications(value);
                         if (fetchedPublications) {
-                            // Ensure publications is an array of objects
+                            console.log("Fetched publications:", fetchedPublications);
                             setPublications(fetchedPublications);
                         }
                     } catch (err) {
@@ -197,10 +197,10 @@ const LanguageSelector = ({
                     label="Select Publication"
                     onChange={handlePublicationChange}
                 >
-                    {publications.map((publication) => (
+                    {publications.map((publication, index) => (
                         <MenuItem
-                            key={publication.publicationCode}
-                            value={publication.publicationCode}
+                            key={`${publication.publicationID}-${index}`}
+                            value={publication.publicationID}
                         >
                             {publication.publicationName}
                         </MenuItem>

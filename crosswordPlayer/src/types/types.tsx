@@ -21,7 +21,7 @@ export interface LanguageSelectorProps {
 
 export interface Publication {
     publicationName: string;
-    publicationCode: string;
+    publicationID: string;
 }
 
 export interface CrosswordCellProps {

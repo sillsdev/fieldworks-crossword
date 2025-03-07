@@ -48,7 +48,6 @@ const App = () => {
         alignItems: 'center',
         px: { xs: 2, sm: 4 },
         py: 2,
-        pt: 16,
       }}
     >
       <Dialog 

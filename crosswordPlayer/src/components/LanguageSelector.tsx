@@ -11,7 +11,6 @@ import {
 const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
     const { fetchLanguages, /**loading, error,**/ generateCrossword } = useLanguageGenerator(); 
     const [menuLanguages, setMenuLanguages] = useState<LanguageData[]>([]);
-    const [selectedLanguage, setSelectedLanguage] = useState<string>("");
     
     const [bcp47Code, setBcp47Code] = useState<string>("");
     const [languageName, setLanguageName] = useState<string>("");
@@ -54,8 +53,7 @@ const LanguageSelector = ({ onCrosswordGenerated }: LanguageSelectorProps) => {
                 lang.languageCode.languageName === bcp47Code);
             
             if (selected) {
-                setSelectedLanguage(`${selected.projectName}-${selected.languageCode}`);
-                
+                //setSelectedLanguage(`${selected.projectName}-${selected.languageCode}`);
                 const generateCrosswordForLanguage = async () => {
                     try {
                         const crosswordData = await generateCrossword(

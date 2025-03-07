@@ -1,8 +1,9 @@
 import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
 import { useEffect, useState, useRef } from 'react';
+import { CrosswordBoardProps } from '../../types/types';
 
-const CrosswordBoard = ({ grid, handleClick, isActiveCell, handleInput }) => {
+const CrosswordBoard: React.FC<CrosswordBoardProps> = ({ grid, handleClick, isActiveCell, handleInput }) => {
     const [cellSize, setCellSize] = useState(40); 
     const containerRef = useRef<HTMLDivElement>(null);
     const [showFeedback, setShowFeedback] = useState(false);

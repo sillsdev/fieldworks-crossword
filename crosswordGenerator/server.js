@@ -77,7 +77,7 @@ app.get("/generate-crossword", async (req, res) => {
             let word = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];
             return validateWord(word);
         });
-        let my10Words = chooseRandomWords(filteredData, 10);
+        let my10Words = chooseRandomWords(filteredData, 3);
         // make chosen words into an object
         const input = my10Words.map(entry => {
             // Define clue for each entry
@@ -85,11 +85,10 @@ app.get("/generate-crossword", async (req, res) => {
                 || (entry.senses[0].gloss.hasOwnProperty(analysisLanguage) ? entry.senses[0].gloss[analysisLanguage] : Object.values(entry.senses[0].gloss)[0]);
             return {
                 clue: clue,
-                answer: (entry.citationForm[languageCode] || entry.lexemeForm[languageCode])
+                answer: (entry.citationForm[languageCode] || entry.lexemeForm[languageCode]).normalize("NFC")
             };
         });
         var layout = generateLayout(input);
-        // TODO: maybe trim down what is returned
         res.json(layout);
     } catch (error) {
         console.error("Error fetching data:", error.message);
@@ -126,5 +125,6 @@ function chooseRandomWords(dictionaryWords, numWords) {
 // makes sure it is between 4 and 10 characters long
 // this can be added to if we determine more validation is needed
 function validateWord(word) {
+    word = word.normalize("NFC");
     return word.length <= 10 && word.length >= 4 && !/[\s\d]/.test(word);
 }

@@ -124,6 +124,7 @@ const App = () => {
             sx={{ 
               width: { xs: '100%', md: '40%' }, 
               height: { md: 'auto' },
+              maxHeight: '100vh', // Add this line
               display: 'flex',
               flexDirection: 'column',
               overflowY: 'auto',

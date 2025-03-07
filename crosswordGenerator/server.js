@@ -40,11 +40,14 @@ app.get("/fetch-project-names", async (req, res) => {
 app.get("/fetch-vernacular-languages", async (req, res) => {
     console.log("Fetching data from external API...");
     const apiUrl = 'http://localhost:49279/api/localProjects';
-    
+    if (!req.query.projectName) {
+        res.status(400).json({ error: "Missing project name parameter" });
+        return;
+    }
     try {
         const apiResponse = await axios.get(apiUrl);
         const languages = await Promise.all(apiResponse.data.map(async (element) => {
-            if (element.fwdata === true) {
+            if (element.fwdata === true && element.name === req.query.projectName) {
                 // get language code for each fwdata project
                 const languageInfo = await fetchLanguages(element.name);
                 return languageInfo.vernacularLanguages;
@@ -61,11 +64,14 @@ app.get("/fetch-vernacular-languages", async (req, res) => {
 app.get("/fetch-analysis-languages", async (req, res) => {
     console.log("Fetching data from external API...");
     const apiUrl = 'http://localhost:49279/api/localProjects';
-    
+    if (!req.query.projectName) {
+        res.status(400).json({ error: "Missing project name parameter" });
+        return;
+    }
     try {
         const apiResponse = await axios.get(apiUrl);
         const languages = await Promise.all(apiResponse.data.map(async (element) => {
-            if (element.fwdata === true) {
+            if (element.fwdata === true && element.name === req.query.projectName) {
                 // get language code for each fwdata project
                 const languageInfo = await fetchLanguages(element.name);
                 return languageInfo.analysisLanguages;

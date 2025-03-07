@@ -69,9 +69,29 @@ app.get("/fetch-analysis-languages", async (req, res) => {
     }
 });
 
+app.get("/fetch-publications", async (req, res) => {
+    console.log("Fetching data from external API...");
+    const { projectName } = req.query;
+    const apiUrl = `http://localhost:49279/api/mini-lcm/FwData/${projectName}/publications`;
+    
+    try {
+        const apiResponse = await axios.get(apiUrl);
+        const vernacularLanguages = apiResponse.data.map(vernacularEntry => {
+            return {
+                publicationName: Object.values(vernacularEntry.name)[0],
+                publicationID: vernacularEntry.id
+            }
+        });
+        res.json(vernacularLanguages.filter(lang => lang !== null));
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch publications" });
+        console.error("Error fetching publications:", error.message);
+    }
+});
+
 app.get("/generate-crossword", async (req, res) => {
     console.log("Generating Crossword...");
-    const { projectName, languageCode, analysisLanguage } = req.query;
+    const { projectName, languageCode, analysisLanguage, publication } = req.query;
     // IF projectname or languageCode is not present throw an error
     if (!projectName || !languageCode) {
         return res.status(400).json({
@@ -85,7 +105,7 @@ app.get("/generate-crossword", async (req, res) => {
         const apiResponse = await axios.get(apiUrl);
         // filter words
         const filteredData = apiResponse.data.filter(entry => {
-            return validateWord(entry, languageCode);
+            return validateWord(entry, languageCode, publication);
         });
         let my10Words = chooseRandomWords(filteredData, 10);
         // make chosen words into an object
@@ -137,10 +157,13 @@ function chooseRandomWords(dictionaryWords, numWords) {
     return randomWords;
 }
 
-// make sure word does not contain spaces or numbers
-// makes sure it is between 4 and 10 characters long
-// this can be added to if we determine more validation is needed
-function validateWord(entry, languageCode) {
+// makes sure word does not contain spaces or numbers
+// makes sure word is between 4 and 10 characters long
+    // if publication is provided, make sure word matches
+function validateWord(entry, languageCode, publication) {
+    if (publication && !entry.publishIn.some(pub => pub.id === publication)) {
+        return false;
+    }
     let word = "";
     if (entry.citationForm[languageCode] || entry.lexemeForm[languageCode]) {
         word = entry.citationForm[languageCode] || entry.lexemeForm[languageCode];

@@ -32,7 +32,8 @@ app.get("/fetch-project-names", async (req, res) => {
         }));
         res.json(projects.filter(lang => lang !== null));
     } catch (error) {
-        console.error("Error fetching languages:", error.message);
+        console.error("Error fetching project names:", error.message);
+        res.status(500).json({ error: "Failed to fetch project names" });
     }
 });
 
@@ -52,7 +53,8 @@ app.get("/fetch-vernacular-languages", async (req, res) => {
         }));
         res.json(languages.filter(lang => lang !== null));
     } catch (error) {
-        console.error("Error fetching languages:", error.message);
+        res.status(500).json({ error: "Failed to fetch vernacular languages" });
+        console.error("Error fetching vernacular languages:", error.message);
     }
 });
 
@@ -72,10 +74,10 @@ app.get("/fetch-analysis-languages", async (req, res) => {
         }));
         res.json(languages.filter(lang => lang !== null));
     } catch (error) {
-        console.error("Error fetching languages:", error.message);
+        res.status(500).json({ error: "Failed to fetch analysis languages" });
+        console.error("Error fetching analysis languages:", error.message);
     }
 });
-
 
 // fetch language code for each project
 async function fetchLanguages(projectName) {

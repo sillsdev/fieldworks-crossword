@@ -1,28 +1,62 @@
 import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import { CellData } from '../../hooks/useCrossword';
 
-const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
-    const [cellSize, setCellSize] = useState(40); 
+interface CrosswordBoardProps {
+    grid: CellData[][];
+    handleClick: (row: number, col: number) => void;
+    isActiveCell: (row: number, col: number) => boolean;
+    activeCell?: { row: number; col: number } | null;
+    activeDirection?: 'across' | 'down';
+}
+
+const CrosswordBoard = ({ 
+    grid, 
+    handleClick, 
+    isActiveCell, 
+    activeCell, 
+    activeDirection 
+}: CrosswordBoardProps) => {
+    const MIN_CELL_SIZE = 35; // Minimum usable cell size
+    const MAX_CELL_SIZE = 55; // Maximum cell size for readability
+    
+    const [cellSize, setCellSize] = useState(MIN_CELL_SIZE); 
     const containerRef = useRef<HTMLDivElement>(null);
-    const [showFeedback, setShowFeedback] = useState(false);
+    const [showCorrectFeedback, setShowCorrectFeedback] = useState(false);
+    const [showIncorrectFeedback, setShowIncorrectFeedback] = useState(false);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     
+    // Calculate grid dimensions only when row/column count changes
+    const gridDimensions = useMemo(() => {
+        return {
+            rows: grid?.length || 0,
+            cols: grid?.[0]?.length || 0
+        };
+    }, [grid?.length, grid?.[0]?.length]);
+    
     useEffect(() => {
-        if (!grid || grid.length === 0 || !containerRef.current) return;
+        if (!grid || grid.length === 0) return;
         
         const calculateCellSize = () => {
-            const containerWidth = containerRef.current?.clientWidth || 500;
+            if (!containerRef.current) return MIN_CELL_SIZE;
+            
+            // Get parent container width (the outer Box)
+            const parentWidth = containerRef.current.parentElement?.clientWidth || 500;
+            const parentHeight = containerRef.current.parentElement?.clientHeight || 500;
             
             const numRows = grid.length;
             const numCols = grid[0].length;
             
-            const maxCellWidth = (containerWidth - 20) / numCols;
-            const maxCellHeight = (containerWidth - 20) / numRows; 
+            // Calculate how big each cell can be based on parent dimensions
+            const maxCellWidth = parentWidth / numCols;
+            const maxCellHeight = parentHeight / numRows; 
             
+            // Use the smaller dimension to ensure cells are square
             const newSize = Math.min(Math.floor(maxCellWidth), Math.floor(maxCellHeight));
             
-            return Math.max(30, Math.min(60, newSize));
+            // Keep size within reasonable bounds
+            return Math.min(MAX_CELL_SIZE, Math.max(MIN_CELL_SIZE, newSize));
         };
         
         setCellSize(calculateCellSize());
@@ -33,22 +67,35 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
         
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [grid]);
+    }, [gridDimensions]);
 
     useEffect(() => {
-        const hasFeedback = grid?.some(row => 
-            row.some(cell => cell.isCorrect || cell.isIncorrect)
+        // First identify correct cells
+        const hasCorrectFeedback = grid?.some(row => 
+            row.some(cell => cell.isCorrect)
         );
         
-        if (hasFeedback) {
-            setShowFeedback(true);
+        // For incorrect cells, STRICTLY exclude any that are also marked as correct
+        const hasIncorrectFeedback = grid?.some(row => 
+            row.some(cell => cell.isIncorrect && !cell.isCorrect)
+        );
+        
+        // Always update correct feedback first
+        setShowCorrectFeedback(hasCorrectFeedback);
+        
+        // Then handle incorrect feedback
+        if (hasIncorrectFeedback) {
+            setShowIncorrectFeedback(true);
+            
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
             }
             
             timeoutRef.current = setTimeout(() => {
-                setShowFeedback(false);
+                setShowIncorrectFeedback(false);
             }, 3000);
+        } else {
+            setShowIncorrectFeedback(false);
         }
         
         return () => {
@@ -57,18 +104,87 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
             }
         };
     }, [grid]);
-    
-    
-    const minBoardWidth = grid && grid[0] ? grid[0].length * cellSize : 100;
-    const minBoardHeight = grid ? grid.length * cellSize : 100;
+
+    // Calculate the actual board size based on cell size (for rendering only)
+    const boardWidth = grid && grid[0] ? grid[0].length * cellSize : 300;
+    const boardHeight = grid ? grid.length * cellSize : 300;
+
+    // This function determines if a cell is part of the active word
+    const isPartOfActiveWord = (rowIndex: number, colIndex: number): boolean => {
+        if (!activeCell || !activeDirection) return false;
+        
+        // If this is the active cell, it's definitely not *just* part of the word
+        if (activeCell.row === rowIndex && activeCell.col === colIndex) return false;
+        
+        const cell = grid[rowIndex][colIndex];
+        if (!cell || cell.isBlocked) return false;
+        
+        if (activeDirection === 'across') {
+            // For across words, cells must be in the same row as the active cell
+            if (rowIndex !== activeCell.row) return false;
+            
+            // Find the bounds of the word
+            let startCol = activeCell.col;
+            let endCol = activeCell.col;
+            
+            // Find the leftmost cell in this word
+            while (startCol > 0 && !grid[rowIndex][startCol - 1].isBlocked) {
+                startCol--;
+            }
+            
+            // Find the rightmost cell in this word
+            while (endCol < grid[0].length - 1 && !grid[rowIndex][endCol + 1].isBlocked) {
+                endCol++;
+            }
+            
+            // Return true if the cell is within the bounds of the word
+            return colIndex >= startCol && colIndex <= endCol;
+        } else {
+            // For down words, cells must be in the same column as the active cell
+            if (colIndex !== activeCell.col) return false;
+            
+            // Find the bounds of the word
+            let startRow = activeCell.row;
+            let endRow = activeCell.row;
+            
+            // Find the topmost cell in this word
+            while (startRow > 0 && !grid[startRow - 1][colIndex].isBlocked) {
+                startRow--;
+            }
+            
+            // Find the bottommost cell in this word
+            while (endRow < grid.length - 1 && !grid[endRow + 1][colIndex].isBlocked) {
+                endRow++;
+            }
+            
+            // Return true if the cell is within the bounds of the word
+            return rowIndex >= startRow && rowIndex <= endRow;
+        }
+    };
 
     return (
         <Box 
             sx={{
                 width: '100%',
+                maxWidth: '100%',
+                maxHeight: '70vh',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
+                overflowY: 'auto',
+                padding: 1,
+                // Add some styling for better scrolling experience
+                '&::-webkit-scrollbar': {
+                    width: '8px',
+                    height: '8px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(0,0,0,0.2)',
+                    borderRadius: '4px',
+                },
+                '&::-webkit-scrollbar-track': {
+                    backgroundColor: 'rgba(0,0,0,0.05)',
+                },
             }}
         >
             <Box
@@ -77,12 +193,10 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                     display: 'flex',
                     flexDirection: 'column',
                     border: `2px solid ${theme.palette.grey[900]}`,
-                    width: '100%',
-                    maxWidth: '500px',
-                    minWidth: minBoardWidth,
-                    minHeight: minBoardHeight,
-                    maxHeight: '500px',
+                    width: boardWidth,
+                    height: boardHeight,
                     margin: 'auto',
+                    flexShrink: 0,
                 })}
             >
                 {grid.map((row, rowIndex) => (
@@ -90,7 +204,7 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                         key={rowIndex} 
                         sx={{
                             display: 'flex',
-                            flex: 1,
+                            height: cellSize,
                             width: '100%',
                         }}
                     >
@@ -100,10 +214,11 @@ const CrosswordBoard = ({ grid, handleClick, isActiveCell }) => {
                                 value={cell.value}
                                 number={cell.number}
                                 isActive={isActiveCell(rowIndex, colIndex)}
-                                isCorrect={showFeedback && cell.isCorrect}
-                                isIncorrect={showFeedback && cell.isIncorrect}
+                                isPartOfActiveWord={isPartOfActiveWord(rowIndex, colIndex)}
+                                isCorrect={showCorrectFeedback && cell.isCorrect}
+                                isIncorrect={showIncorrectFeedback && cell.isIncorrect && !cell.isCorrect}
                                 isBlocked={cell.isBlocked}
-                                onClick={() => handleClick(rowIndex, colIndex)}
+                                onClick={cell.isBlocked ? undefined : () => handleClick(rowIndex, colIndex)}
                                 width={cellSize}
                                 height={cellSize}
                             />

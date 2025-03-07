@@ -18,6 +18,7 @@ export interface CrosswordCellProps {
     isBlocked?: boolean;
     isCorrect?: boolean;
     isIncorrect?: boolean;
+    isPartOfActiveWord?: boolean;
     onClick?: (event: React.MouseEvent) => void;
     onKeyDown?: (event: React.KeyboardEvent) => void;
     width?: number;
@@ -31,6 +32,7 @@ export interface CrosswordCluesProps {
     };
     onClueClick?: (type: 'across' | 'down', number: number) => void;
     activeClue?: { type: 'across' | 'down'; number: number } | null;
+    correctWords: string[];
 }
 
 export interface UseClueInteractionProps {

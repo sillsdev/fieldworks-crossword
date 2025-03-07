@@ -87,4 +87,6 @@ export interface CrosswordBoardProps {
     handleClick: (rowIndex: number, colIndex: number) => void;
     isActiveCell: (rowIndex: number, colIndex: number) => boolean;
     handleInput: (char: string) => void;
+    activeCell: ActiveCellPosition | null;
+    activeDirection: Direction | null;
 }

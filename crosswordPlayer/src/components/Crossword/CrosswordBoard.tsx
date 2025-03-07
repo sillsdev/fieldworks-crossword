@@ -1,9 +1,18 @@
 import { Box } from '@mui/material';
 import CrosswordCell from './CrosswordCell';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { CrosswordBoardProps } from '../../types/types';
 
-const CrosswordBoard: React.FC<CrosswordBoardProps> = ({ grid, handleClick, isActiveCell, handleInput }) => {
+const CrosswordBoard = ({ 
+    grid, 
+    handleClick, 
+    isActiveCell, 
+    activeCell, 
+    activeDirection,
+    handleInput
+}: CrosswordBoardProps) => {
+    const MIN_CELL_SIZE = 35; // Minimum usable cell size
+    const MAX_CELL_SIZE = 55; // Maximum cell size for readability
     const [cellSize, setCellSize] = useState(40); 
     const containerRef = useRef<HTMLDivElement>(null);
     const [showCorrectFeedback, setShowCorrectFeedback] = useState(false);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Button } from '@mui/material';
 import useLanguageGenerator from '../hooks/useLanguageGenerator';
 import { LanguageSelectorProps } from '../types/types';
 
@@ -21,6 +21,7 @@ const LanguageSelector = ({
     const [projects, setProjects] = useState<string[]>([]);
     const [menuLanguages, setMenuLanguages] = useState<string[]>([]);
     const [analysisLanguages, setAnalysisLanguages] = useState<string[]>([]);
+    const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
     useEffect(() => {
         setSelectedProject('');
@@ -80,17 +81,25 @@ const LanguageSelector = ({
         
         if (value) {
             setSelectedAnalysis(value);
+        }
+    };
+
+    const handleGenerateCrossword = async () => {
+        if (selectedProject && selectedLanguage && selectedAnalysis) {
+            setIsGenerating(true);
             try {
                 const crosswordData = await generateCrossword(
                     selectedProject, 
                     selectedLanguage, 
-                    value
+                    selectedAnalysis
                 );
-            if (crosswordData) {
-                onCrosswordGenerated(crosswordData);
-            }
+                if (crosswordData) {
+                    onCrosswordGenerated(crosswordData);
+                }
             } catch (err) {
                 console.error("Error generating crossword:", err);
+            } finally {
+                setIsGenerating(false);
             }
         }
     };
@@ -147,7 +156,7 @@ const LanguageSelector = ({
                 fullWidth 
                 size="small" 
                 sx={{ mb: 2 }}
-                disabled={!selectedProject && !selectedLanguage}
+                disabled={!selectedProject || !selectedLanguage}
             >
                 <InputLabel id="analysis-select-label">Select Analysis Language</InputLabel>
                 <Select
@@ -167,6 +176,16 @@ const LanguageSelector = ({
                     ))}
                 </Select>
             </FormControl>
+
+            <Button 
+                variant="contained" 
+                color="primary"
+                disabled={!selectedProject || !selectedLanguage || !selectedAnalysis || isGenerating}
+                onClick={handleGenerateCrossword}
+                fullWidth
+            >
+                {isGenerating ? 'Generating...' : 'Generate Crossword'}
+            </Button>
         </Box>
     );
 };
